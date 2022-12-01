@@ -282,7 +282,7 @@ public class ImportForm : System.Windows.Forms.Form
         this.PerformLayout();
     }
 
-    private Dictionary<string, List<PeInfo.ImportDirectory.ImportDate.FunctionList>> importFunctionList;
+    private Dictionary<string, List<ImportDirectory.ImportDate.FunctionList>> importFunctionList;
     private DataGridView songsDataGridView;
     private PeInfo info;
 
@@ -348,7 +348,7 @@ public class ImportForm : System.Windows.Forms.Form
         }
 
         string item = listBox1.SelectedItem as string;
-        List<PeInfo.ImportDirectory.ImportDate.FunctionList> functionLists;
+        List<ImportDirectory.ImportDate.FunctionList> functionLists;
         if (importFunctionList.TryGetValue(item, out functionLists))
         {
             DataTable ReturnTable = new DataTable();

@@ -65,7 +65,8 @@ namespace PE_Tools
             this.DragDrop += Form1_DragDrop;
             this.DragEnter += Form1_DragEnter;
             // OpenPE(@"C:\Users\yangyang.he\Desktop\MAA\mkldnn.dll");
-            OpenPE(@"C:\Users\yangyang.he\Desktop\notepad.exe");
+            // OpenPE(@"C:\work\reversecore\example\02\15\bin\notepad_upx.exe");
+            OpenPE(@"C:\hybridclr_trial\Assets\StreamingAssets\Assembly-CSharp.dll.bytes");
         }
 
         private void Form1_DragEnter(object sender, DragEventArgs e) //解析信息
@@ -105,16 +106,15 @@ namespace PE_Tools
         void OpenPE(string path)
         {
             PeInfo tmpInfo;
-            try
+            // try
             {
                 tmpInfo = new PeInfo(path);
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-                MessageBox.Show("解析错误!");
-                return;
-            }
+            // catch (Exception e)
+            // {
+            //     MessageBox.Show("解析错误:" + e.ToString());
+            //     return;
+            // }
 
             info = tmpInfo;
             while (tabControl1.Controls.Count > 0)
@@ -137,7 +137,8 @@ namespace PE_Tools
             }
 
             tabControl1.SelectedIndex = -1;
-            tabControl1.SelectedIndex = 0;
+            // tabControl1.SelectedIndex = 0;
+            tabControl1.SelectedIndex = 4;
         }
 
         void CreateDosHeaderPanel(TabPage tabPage1)
@@ -200,6 +201,7 @@ namespace PE_Tools
 
             tabPage1.Controls.Add(songsDataGridView);
             songsDataGridView.DataSource = info.TableOptionalDirAttrib();
+            OnDirBtnClick(tabPage1.Controls.Find("CLR",false)[0], null);
         }
 
         void OnDirBtnClick(object sender, EventArgs e)
@@ -230,6 +232,14 @@ namespace PE_Tools
 
                     break;
                 case "CLR":
+                    if (info.clrDirectory != null)
+                    {
+                        MetaForm importForm = new MetaForm();
+                        importForm.Init(info);
+                        importForm.ShowDialog();
+                        return;
+                    }
+                    
                     break;
             }
 

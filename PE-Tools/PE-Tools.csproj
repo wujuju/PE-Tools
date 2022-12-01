@@ -12,16 +12,18 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <LangVersion>9</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -46,30 +48,49 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExportForm.cs">
+    <Compile Include="Core\Base\Attribute.cs" />
+    <Compile Include="Core\Base\BytesArray.cs" />
+    <Compile Include="Core\Base\IRowReaders.cs" />
+    <Compile Include="Core\Base\PEInfoBase.cs" />
+    <Compile Include="Core\Base\PEInfoType.cs" />
+    <Compile Include="Core\Base\RawTableRows.cs" />
+    <Compile Include="Core\Base\StreamBase.cs" />
+    <Compile Include="Core\Base\TableStream.cs" />
+    <Compile Include="Core\ExportForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ExportForm.Designer.cs">
+    <Compile Include="Core\ExportForm.Designer.cs">
       <DependentUpon>ExportForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainForm.cs">
+    <Compile Include="Core\Metadata.cs" />
+    <Compile Include="Core\PEDirectory.cs" />
+    <Compile Include="Core\PEInfo.cs" />
+    <Compile Include="Core\PETools.cs" />
+    <Compile Include="Form\ImportForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
+    <Compile Include="Form\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ImportForm.cs">
+    <Compile Include="Form\MetaForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PEInfo.cs" />
-    <Compile Include="PEInfoType.cs" />
+    <Compile Include="Form\MetaForm.Designer.cs">
+      <DependentUpon>MetaForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Include="Form\ImportForm.resx">
+      <DependentUpon>ImportForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ImportForm.resx">
-      <DependentUpon>ImportForm.cs</DependentUpon>
+    <EmbeddedResource Include="Form\MetaForm.resx">
+      <DependentUpon>MetaForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

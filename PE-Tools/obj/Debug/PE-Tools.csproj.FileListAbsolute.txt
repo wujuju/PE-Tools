@@ -9,3 +9,4 @@ C:\Users\yangyang.he\source\repos\PE-Tools\PE-Tools\obj\Debug\PE-Tools.exe
 C:\Users\yangyang.he\source\repos\PE-Tools\PE-Tools\obj\Debug\PE-Tools.pdb
 C:\Users\yangyang.he\source\repos\PE-Tools\PE-Tools\obj\Debug\ImportForm.resources
 C:\Users\yangyang.he\source\repos\PE-Tools\PE-Tools\obj\Debug\PE_Tools.MainForm.resources
+C:\Users\yangyang.he\source\repos\PE-Tools\PE-Tools\obj\Debug\PE_Tools.MetaForm.resources
