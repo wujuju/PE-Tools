@@ -44,8 +44,8 @@ public class MetadataHeader
 
 public class HeapStream : StreamBase
 {
-    [IntAttribute] public int offset;
-    [IntAttribute] public int streamSize;
+    [UintAttribute] public uint offset;
+    [UintAttribute] public uint streamSize;
     [StringAttribute] public string name;
     public List<HeapStreamString> list = new List<HeapStreamString>();
 }
@@ -89,9 +89,10 @@ public sealed class ColumnInfo
         Debug.Assert(size == 2 || size == 4);
         return size == 2 ? reader.ReadUInt16() : reader.ReadUInt32();
     }
-    
+
     public uint Read(ref BytesArray reader) =>
-        size switch {
+        size switch
+        {
             1 => reader.ReadInt8(),
             2 => reader.ReadUInt16(),
             4 => reader.ReadUInt32(),
@@ -174,20 +175,27 @@ public sealed class MDTable
         if (length > 8) Column8 = columns[8];
     }
 
-    public void UpdateSize(IList<uint> systemRowCounts, ref uint offset)
+    bool bigStrings;
+    bool bigGuid;
+    bool bigBlob;
+
+    public void UpdateSize(bool bigStrings, bool bigGuid, bool bigBlob, IList<uint> systemRowCounts, ref uint offset)
     {
+        this.bigStrings = bigStrings;
+        this.bigGuid = bigGuid;
+        this.bigBlob = bigBlob;
         uint colOffset = 0;
         foreach (var colInfo in tableInfo.columns)
         {
-            colInfo.offset = colOffset;
+            colInfo.offset = offset + colOffset;
             var colSize = GetSize(colInfo.columnSize, systemRowCounts);
             colInfo.size = colSize;
             colOffset += colSize;
         }
 
         tableInfo.offset = offset;
-        tableInfo.size = colOffset * numRows;
-        offset += tableInfo.size;
+        tableInfo.size = colOffset;
+        offset += tableInfo.size * numRows;
     }
 
     uint GetSize(ColumnSize columnSize, IList<uint> rowCounts)
@@ -225,134 +233,28 @@ public sealed class MDTable
                     maxRows = tableRows;
             }
 
-            return 2;
+            uint finalRows = maxRows << info.Bits;
+            return finalRows > 0xFFFF ? 4U : 2;
         }
         else
         {
             switch (columnSize)
             {
                 case ColumnSize.Byte: return 1;
+
+                case ColumnSize.MethodFlags:
+                case ColumnSize.FieldFlags:
                 case ColumnSize.Int16: return 2;
                 case ColumnSize.UInt16: return 2;
                 case ColumnSize.Int32: return 4;
+                case ColumnSize.TypeFlags:
                 case ColumnSize.UInt32: return 4;
-                case ColumnSize.Strings: return 2;
-                case ColumnSize.GUID: return 2;
-                case ColumnSize.Blob: return 2;
+                case ColumnSize.Strings: return bigStrings ? 4U : 2;
+                case ColumnSize.GUID: return bigGuid ? 4U : 2;
+                case ColumnSize.Blob: return bigBlob ? 4U : 2;
             }
         }
 
         throw new InvalidOperationException($"Invalid ColumnSize: {columnSize}");
-    }
-}
-
-
-public sealed class CodedToken
-{
-    /// <summary>TypeDefOrRef coded token</summary>
-    public static readonly CodedToken TypeDefOrRef = new CodedToken(2, new Table[3]
-    {
-        Table.TypeDef, Table.TypeRef, Table.TypeSpec,
-    });
-
-    /// <summary>HasConstant coded token</summary>
-    public static readonly CodedToken HasConstant = new CodedToken(2, new Table[3]
-    {
-        Table.Field, Table.Param, Table.Property,
-    });
-
-    /// <summary>HasCustomAttribute coded token</summary>
-    public static readonly CodedToken HasCustomAttribute = new CodedToken(5, new Table[24]
-    {
-        Table.Method, Table.Field, Table.TypeRef, Table.TypeDef,
-        Table.Param, Table.InterfaceImpl, Table.MemberRef, Table.Module,
-        Table.DeclSecurity, Table.Property, Table.Event, Table.StandAloneSig,
-        Table.ModuleRef, Table.TypeSpec, Table.Assembly, Table.AssemblyRef,
-        Table.File, Table.ExportedType, Table.ManifestResource, Table.GenericParam,
-        Table.GenericParamConstraint, Table.MethodSpec, 0, 0,
-    });
-
-    /// <summary>HasFieldMarshal coded token</summary>
-    public static readonly CodedToken HasFieldMarshal = new CodedToken(1, new Table[2]
-    {
-        Table.Field, Table.Param,
-    });
-
-    /// <summary>HasDeclSecurity coded token</summary>
-    public static readonly CodedToken HasDeclSecurity = new CodedToken(2, new Table[3]
-    {
-        Table.TypeDef, Table.Method, Table.Assembly,
-    });
-
-    /// <summary>MemberRefParent coded token</summary>
-    public static readonly CodedToken MemberRefParent = new CodedToken(3, new Table[5]
-    {
-        Table.TypeDef, Table.TypeRef, Table.ModuleRef, Table.Method,
-        Table.TypeSpec,
-    });
-
-    /// <summary>HasSemantic coded token</summary>
-    public static readonly CodedToken HasSemantic = new CodedToken(1, new Table[2]
-    {
-        Table.Event, Table.Property,
-    });
-
-    /// <summary>MethodDefOrRef coded token</summary>
-    public static readonly CodedToken MethodDefOrRef = new CodedToken(1, new Table[2]
-    {
-        Table.Method, Table.MemberRef,
-    });
-
-    /// <summary>MemberForwarded coded token</summary>
-    public static readonly CodedToken MemberForwarded = new CodedToken(1, new Table[2]
-    {
-        Table.Field, Table.Method,
-    });
-
-    /// <summary>Implementation coded token</summary>
-    public static readonly CodedToken Implementation = new CodedToken(2, new Table[3]
-    {
-        Table.File, Table.AssemblyRef, Table.ExportedType,
-    });
-
-    /// <summary>CustomAttributeType coded token</summary>
-    public static readonly CodedToken CustomAttributeType = new CodedToken(3, new Table[5]
-    {
-        0, 0, Table.Method, Table.MemberRef, 0,
-    });
-
-    /// <summary>ResolutionScope coded token</summary>
-    public static readonly CodedToken ResolutionScope = new CodedToken(2, new Table[4]
-    {
-        Table.Module, Table.ModuleRef, Table.AssemblyRef, Table.TypeRef,
-    });
-
-    /// <summary>TypeOrMethodDef coded token</summary>
-    public static readonly CodedToken TypeOrMethodDef = new CodedToken(1, new Table[2]
-    {
-        Table.TypeDef, Table.Method,
-    });
-
-    /// <summary>HasCustomDebugInformation coded token</summary>
-    public static readonly CodedToken HasCustomDebugInformation = new CodedToken(5, new Table[27]
-    {
-        Table.Method, Table.Field, Table.TypeRef, Table.TypeDef,
-        Table.Param, Table.InterfaceImpl, Table.MemberRef, Table.Module,
-        Table.DeclSecurity, Table.Property, Table.Event, Table.StandAloneSig,
-        Table.ModuleRef, Table.TypeSpec, Table.Assembly, Table.AssemblyRef,
-        Table.File, Table.ExportedType, Table.ManifestResource, Table.GenericParam,
-        Table.GenericParamConstraint, Table.MethodSpec, Table.Document, Table.LocalScope,
-        Table.LocalVariable, Table.LocalConstant, Table.ImportScope,
-    });
-
-    public readonly Table[] tableTypes;
-    readonly int bits;
-    readonly int mask;
-
-    internal CodedToken(int bits, Table[] tableTypes)
-    {
-        this.bits = bits;
-        mask = (1 << bits) - 1;
-        this.tableTypes = tableTypes;
     }
 }

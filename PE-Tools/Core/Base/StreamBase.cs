@@ -5,16 +5,26 @@ public class StreamBase
 {
     public BytesArray reader;
 
-    public string Read(int offset)
+    public byte[] ReadUTF16String(uint offset)
     {
-        reader.Position = (uint)offset;
-        var data = reader.TryReadBytesUntil(0);
+        reader.Position = offset;
+        int length = ReadCompressedUint32(out int lengthSize);
+        var length2 = (int)(length / 2) * 2;
+        var bytes = Loadbyte(length2);
+        reader.Position += (uint)(length - length2);
+        return bytes;
+    }
+
+    public string Read(uint offset)
+    {
+        reader.Position = offset;
+        var data = reader.ReadString();
         return Encoding.UTF8.GetString(data);
     }
 
     public byte[] TryReadBytesUntil()
     {
-        return reader.TryReadBytesUntil(0);
+        return reader.ReadString();
     }
 
     public virtual Guid ReadGuid() =>

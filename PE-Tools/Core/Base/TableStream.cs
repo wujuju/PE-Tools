@@ -1,128 +1,172 @@
-public class TableStream : StreamBase
+public partial class TableStream : StreamBase
 {
     public MDTable[] tables;
     public TableInfo[] infos;
     public uint tablesPos;
-    
-    IColumnReader columnReader;
-    IRowReader<RawMethodRow> methodRowReader;
-    public IRowReader<RawMethodRow> MethodRowReader {
-        get => methodRowReader;
-        set => methodRowReader = value;
-    }
-    
-    #pragma warning disable 1591	// XML doc comment
-		public MDTable ModuleTable { get; private set; }
-		public MDTable TypeRefTable { get; private set; }
-		public MDTable TypeDefTable { get; private set; }
-		public MDTable FieldPtrTable { get; private set; }
-		public MDTable FieldTable { get; private set; }
-		public MDTable MethodPtrTable { get; private set; }
-		public MDTable MethodTable { get; private set; }
-		public MDTable ParamPtrTable { get; private set; }
-		public MDTable ParamTable { get; private set; }
-		public MDTable InterfaceImplTable { get; private set; }
-		public MDTable MemberRefTable { get; private set; }
-		public MDTable ConstantTable { get; private set; }
-		public MDTable CustomAttributeTable { get; private set; }
-		public MDTable FieldMarshalTable { get; private set; }
-		public MDTable DeclSecurityTable { get; private set; }
-		public MDTable ClassLayoutTable { get; private set; }
-		public MDTable FieldLayoutTable { get; private set; }
-		public MDTable StandAloneSigTable { get; private set; }
-		public MDTable EventMapTable { get; private set; }
-		public MDTable EventPtrTable { get; private set; }
-		public MDTable EventTable { get; private set; }
-		public MDTable PropertyMapTable { get; private set; }
-		public MDTable PropertyPtrTable { get; private set; }
-		public MDTable PropertyTable { get; private set; }
-		public MDTable MethodSemanticsTable { get; private set; }
-		public MDTable MethodImplTable { get; private set; }
-		public MDTable ModuleRefTable { get; private set; }
-		public MDTable TypeSpecTable { get; private set; }
-		public MDTable ImplMapTable { get; private set; }
-		public MDTable FieldRVATable { get; private set; }
-		public MDTable ENCLogTable { get; private set; }
-		public MDTable ENCMapTable { get; private set; }
-		public MDTable AssemblyTable { get; private set; }
-		public MDTable AssemblyProcessorTable { get; private set; }
-		public MDTable AssemblyOSTable { get; private set; }
-		public MDTable AssemblyRefTable { get; private set; }
-		public MDTable AssemblyRefProcessorTable { get; private set; }
-		public MDTable AssemblyRefOSTable { get; private set; }
-		public MDTable FileTable { get; private set; }
-		public MDTable ExportedTypeTable { get; private set; }
-		public MDTable ManifestResourceTable { get; private set; }
-		public MDTable NestedClassTable { get; private set; }
-		public MDTable GenericParamTable { get; private set; }
-		public MDTable MethodSpecTable { get; private set; }
-		public MDTable GenericParamConstraintTable { get; private set; }
-		public MDTable DocumentTable { get; private set; }
-		public MDTable MethodDebugInformationTable { get; private set; }
-		public MDTable LocalScopeTable { get; private set; }
-		public MDTable LocalVariableTable { get; private set; }
-		public MDTable LocalConstantTable { get; private set; }
-		public MDTable ImportScopeTable { get; private set; }
-		public MDTable StateMachineMethodTable { get; private set; }
-		public MDTable CustomDebugInformationTable { get; private set; }
+
+
+#pragma warning disable 1591 // XML doc comment
+    public MDTable ModuleTable { get; private set; }
+    public MDTable TypeRefTable { get; private set; }
+    public MDTable TypeDefTable { get; private set; }
+    public MDTable FieldPtrTable { get; private set; }
+    public MDTable FieldTable { get; private set; }
+    public MDTable MethodPtrTable { get; private set; }
+    public MDTable MethodTable { get; private set; }
+    public MDTable ParamPtrTable { get; private set; }
+    public MDTable ParamTable { get; private set; }
+    public MDTable InterfaceImplTable { get; private set; }
+    public MDTable MemberRefTable { get; private set; }
+    public MDTable ConstantTable { get; private set; }
+    public MDTable CustomAttributeTable { get; private set; }
+    public MDTable FieldMarshalTable { get; private set; }
+    public MDTable DeclSecurityTable { get; private set; }
+    public MDTable ClassLayoutTable { get; private set; }
+    public MDTable FieldLayoutTable { get; private set; }
+    public MDTable StandAloneSigTable { get; private set; }
+    public MDTable EventMapTable { get; private set; }
+    public MDTable EventPtrTable { get; private set; }
+    public MDTable EventTable { get; private set; }
+    public MDTable PropertyMapTable { get; private set; }
+    public MDTable PropertyPtrTable { get; private set; }
+    public MDTable PropertyTable { get; private set; }
+    public MDTable MethodSemanticsTable { get; private set; }
+    public MDTable MethodImplTable { get; private set; }
+    public MDTable ModuleRefTable { get; private set; }
+    public MDTable TypeSpecTable { get; private set; }
+    public MDTable ImplMapTable { get; private set; }
+    public MDTable FieldRVATable { get; private set; }
+    public MDTable ENCLogTable { get; private set; }
+    public MDTable ENCMapTable { get; private set; }
+    public MDTable AssemblyTable { get; private set; }
+    public MDTable AssemblyProcessorTable { get; private set; }
+    public MDTable AssemblyOSTable { get; private set; }
+    public MDTable AssemblyRefTable { get; private set; }
+    public MDTable AssemblyRefProcessorTable { get; private set; }
+    public MDTable AssemblyRefOSTable { get; private set; }
+    public MDTable FileTable { get; private set; }
+    public MDTable ExportedTypeTable { get; private set; }
+    public MDTable ManifestResourceTable { get; private set; }
+    public MDTable NestedClassTable { get; private set; }
+    public MDTable GenericParamTable { get; private set; }
+    public MDTable MethodSpecTable { get; private set; }
+    public MDTable GenericParamConstraintTable { get; private set; }
+    public MDTable DocumentTable { get; private set; }
+    public MDTable MethodDebugInformationTable { get; private set; }
+    public MDTable LocalScopeTable { get; private set; }
+    public MDTable LocalVariableTable { get; private set; }
+    public MDTable LocalConstantTable { get; private set; }
+    public MDTable ImportScopeTable { get; private set; }
+    public MDTable StateMachineMethodTable { get; private set; }
+    public MDTable CustomDebugInformationTable { get; private set; }
 #pragma warning restore
-    
-   public void InitializeTables() {
-			ModuleTable = tables[(int)Table.Module];
-			TypeRefTable = tables[(int)Table.TypeRef];
-			TypeDefTable = tables[(int)Table.TypeDef];
-			FieldPtrTable = tables[(int)Table.FieldPtr];
-			FieldTable = tables[(int)Table.Field];
-			MethodPtrTable = tables[(int)Table.MethodPtr];
-			MethodTable = tables[(int)Table.Method];
-			ParamPtrTable = tables[(int)Table.ParamPtr];
-			ParamTable = tables[(int)Table.Param];
-			InterfaceImplTable = tables[(int)Table.InterfaceImpl];
-			MemberRefTable = tables[(int)Table.MemberRef];
-			ConstantTable = tables[(int)Table.Constant];
-			CustomAttributeTable = tables[(int)Table.CustomAttribute];
-			FieldMarshalTable = tables[(int)Table.FieldMarshal];
-			DeclSecurityTable = tables[(int)Table.DeclSecurity];
-			ClassLayoutTable = tables[(int)Table.ClassLayout];
-			FieldLayoutTable = tables[(int)Table.FieldLayout];
-			StandAloneSigTable = tables[(int)Table.StandAloneSig];
-			EventMapTable = tables[(int)Table.EventMap];
-			EventPtrTable = tables[(int)Table.EventPtr];
-			EventTable = tables[(int)Table.Event];
-			PropertyMapTable = tables[(int)Table.PropertyMap];
-			PropertyPtrTable = tables[(int)Table.PropertyPtr];
-			PropertyTable = tables[(int)Table.Property];
-			MethodSemanticsTable = tables[(int)Table.MethodSemantics];
-			MethodImplTable = tables[(int)Table.MethodImpl];
-			ModuleRefTable = tables[(int)Table.ModuleRef];
-			TypeSpecTable = tables[(int)Table.TypeSpec];
-			ImplMapTable = tables[(int)Table.ImplMap];
-			FieldRVATable = tables[(int)Table.FieldRVA];
-			ENCLogTable = tables[(int)Table.ENCLog];
-			ENCMapTable = tables[(int)Table.ENCMap];
-			AssemblyTable = tables[(int)Table.Assembly];
-			AssemblyProcessorTable = tables[(int)Table.AssemblyProcessor];
-			AssemblyOSTable = tables[(int)Table.AssemblyOS];
-			AssemblyRefTable = tables[(int)Table.AssemblyRef];
-			AssemblyRefProcessorTable = tables[(int)Table.AssemblyRefProcessor];
-			AssemblyRefOSTable = tables[(int)Table.AssemblyRefOS];
-			FileTable = tables[(int)Table.File];
-			ExportedTypeTable = tables[(int)Table.ExportedType];
-			ManifestResourceTable = tables[(int)Table.ManifestResource];
-			NestedClassTable = tables[(int)Table.NestedClass];
-			GenericParamTable = tables[(int)Table.GenericParam];
-			MethodSpecTable = tables[(int)Table.MethodSpec];
-			GenericParamConstraintTable = tables[(int)Table.GenericParamConstraint];
-			DocumentTable = tables[(int)Table.Document];
-			MethodDebugInformationTable = tables[(int)Table.MethodDebugInformation];
-			LocalScopeTable = tables[(int)Table.LocalScope];
-			LocalVariableTable = tables[(int)Table.LocalVariable];
-			LocalConstantTable = tables[(int)Table.LocalConstant];
-			ImportScopeTable = tables[(int)Table.ImportScope];
-			StateMachineMethodTable = tables[(int)Table.StateMachineMethod];
-			CustomDebugInformationTable = tables[(int)Table.CustomDebugInformation];
-		}
-    
+
+    SimpleLazyList<RawModuleRow> listModuleDefMD;
+    SimpleLazyList<RawTypeRefRow> listTypeRefMD;
+    public SimpleLazyList<RawTypeDefRow> listTypeDefMD;
+    SimpleLazyList<RawFieldRow> listFieldDefMD;
+    SimpleLazyList<RawMethodRow> listMethodDefMD;
+    SimpleLazyList<RawParamRow> listParaRowefMD;
+    SimpleLazyList<RawInterfaceImplRow> listInterfaceImplMD;
+    SimpleLazyList<RawMemberRefRow> listMemberRefMD;
+    SimpleLazyList<RawConstantRow> listConstantMD;
+    SimpleLazyList<RawDeclSecurityRow> listDeclSecurityMD;
+    SimpleLazyList<RawClassLayoutRow> listClassLayoutMD;
+    SimpleLazyList<RawStandAloneSigRow> listStandAloneSigMD;
+    SimpleLazyList<RawEventRow> listEventDefMD;
+    SimpleLazyList<RawPropertyRow> listPropertyDefMD;
+    SimpleLazyList<RawModuleRefRow> listModuleRefMD;
+    SimpleLazyList<RawTypeSpecRow> listTypeSpecMD;
+    SimpleLazyList<RawImplMapRow> listImplMapMD;
+    SimpleLazyList<RawAssemblyRow> listAssemblyDefMD;
+    SimpleLazyList<RawAssemblyRefRow> listAssemblyRefMD;
+    SimpleLazyList<RawFileRow> listFileDefMD;
+    SimpleLazyList<RawExportedTypeRow> listExportedTypeMD;
+    SimpleLazyList<RawManifestResourceRow> listManifestResourceMD;
+    SimpleLazyList<RawGenericParamRow> listGenericParamMD;
+    SimpleLazyList<RawMethodSpecRow> listMethodSpecMD;
+    SimpleLazyList<RawGenericParamConstraintRow> listGenericParamConstraintMD;
+    SimpleLazyList<RawParamRow> listParamDefMD;
+    private MetadataHeader mHeader;
+
+    public void Initialize(MetadataHeader header)
+    {
+        this.mHeader = header;
+        listModuleDefMD = new SimpleLazyList<RawModuleRow>(ModuleTable.numRows,
+            rid2 => TryReadModuleRow(rid2, out var row) ? row : null);
+        listTypeRefMD = new SimpleLazyList<RawTypeRefRow>(TypeRefTable.numRows,
+            rid2 => TryReadTypeRefRow(rid2, out var row) ? row : null);
+        listTypeDefMD = new SimpleLazyList<RawTypeDefRow>(TypeDefTable.numRows,
+            rid2 => TryReadTypeDefRow(rid2, out var row) ? row : null);
+        listFieldDefMD = new SimpleLazyList<RawFieldRow>(FieldTable.numRows,
+            rid2 => TryReadFieldRow(rid2, out var row) ? row : null);
+        listMethodDefMD = new SimpleLazyList<RawMethodRow>(MethodTable.numRows,
+            rid2 => TryReadMethodRow(rid2, out var row) ? row : null);
+        listMemberRefMD = new SimpleLazyList<RawMemberRefRow>(MemberRefTable.numRows, (rid2) =>
+            TryReadMemberRefRow(rid2, out var row) ? row : null);
+        listAssemblyRefMD = new SimpleLazyList<RawAssemblyRefRow>(AssemblyRefTable.numRows,
+            rid2 => TryReadAssemblyRefRow(rid2, out var row) ? row : null);
+        listParamDefMD = new SimpleLazyList<RawParamRow>(ParamTable.numRows,
+            rid2 => TryReadParamRow(rid2, out var row) ? row : null);
+    }
+
+    public void InitializeTables()
+    {
+        ModuleTable = tables[(int)Table.Module];
+        TypeRefTable = tables[(int)Table.TypeRef];
+        TypeDefTable = tables[(int)Table.TypeDef];
+        FieldPtrTable = tables[(int)Table.FieldPtr];
+        FieldTable = tables[(int)Table.Field];
+        MethodPtrTable = tables[(int)Table.MethodPtr];
+        MethodTable = tables[(int)Table.Method];
+        ParamPtrTable = tables[(int)Table.ParamPtr];
+        ParamTable = tables[(int)Table.Param];
+        InterfaceImplTable = tables[(int)Table.InterfaceImpl];
+        MemberRefTable = tables[(int)Table.MemberRef];
+        ConstantTable = tables[(int)Table.Constant];
+        CustomAttributeTable = tables[(int)Table.CustomAttribute];
+        FieldMarshalTable = tables[(int)Table.FieldMarshal];
+        DeclSecurityTable = tables[(int)Table.DeclSecurity];
+        ClassLayoutTable = tables[(int)Table.ClassLayout];
+        FieldLayoutTable = tables[(int)Table.FieldLayout];
+        StandAloneSigTable = tables[(int)Table.StandAloneSig];
+        EventMapTable = tables[(int)Table.EventMap];
+        EventPtrTable = tables[(int)Table.EventPtr];
+        EventTable = tables[(int)Table.Event];
+        PropertyMapTable = tables[(int)Table.PropertyMap];
+        PropertyPtrTable = tables[(int)Table.PropertyPtr];
+        PropertyTable = tables[(int)Table.Property];
+        MethodSemanticsTable = tables[(int)Table.MethodSemantics];
+        MethodImplTable = tables[(int)Table.MethodImpl];
+        ModuleRefTable = tables[(int)Table.ModuleRef];
+        TypeSpecTable = tables[(int)Table.TypeSpec];
+        ImplMapTable = tables[(int)Table.ImplMap];
+        FieldRVATable = tables[(int)Table.FieldRVA];
+        ENCLogTable = tables[(int)Table.ENCLog];
+        ENCMapTable = tables[(int)Table.ENCMap];
+        AssemblyTable = tables[(int)Table.Assembly];
+        AssemblyProcessorTable = tables[(int)Table.AssemblyProcessor];
+        AssemblyOSTable = tables[(int)Table.AssemblyOS];
+        AssemblyRefTable = tables[(int)Table.AssemblyRef];
+        AssemblyRefProcessorTable = tables[(int)Table.AssemblyRefProcessor];
+        AssemblyRefOSTable = tables[(int)Table.AssemblyRefOS];
+        FileTable = tables[(int)Table.File];
+        ExportedTypeTable = tables[(int)Table.ExportedType];
+        ManifestResourceTable = tables[(int)Table.ManifestResource];
+        NestedClassTable = tables[(int)Table.NestedClass];
+        GenericParamTable = tables[(int)Table.GenericParam];
+        MethodSpecTable = tables[(int)Table.MethodSpec];
+        GenericParamConstraintTable = tables[(int)Table.GenericParamConstraint];
+        DocumentTable = tables[(int)Table.Document];
+        MethodDebugInformationTable = tables[(int)Table.MethodDebugInformation];
+        LocalScopeTable = tables[(int)Table.LocalScope];
+        LocalVariableTable = tables[(int)Table.LocalVariable];
+        LocalConstantTable = tables[(int)Table.LocalConstant];
+        ImportScopeTable = tables[(int)Table.ImportScope];
+        StateMachineMethodTable = tables[(int)Table.StateMachineMethod];
+        CustomDebugInformationTable = tables[(int)Table.CustomDebugInformation];
+    }
+
     public bool TryReadModuleRow(uint rid, out RawModuleRow row)
     {
         var table = ModuleTable;
@@ -132,7 +176,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawModuleRow(
             reader.ReadUInt16(),
             table.Column1.Unsafe_Read24(ref reader),
@@ -158,11 +202,12 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawTypeRefRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader),
             table.Column2.Unsafe_Read24(ref reader));
+        row.SetMetadataHeader(mHeader);
         return true;
     }
 
@@ -181,7 +226,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawTypeDefRow(
             reader.ReadUInt32(),
             table.Column1.Unsafe_Read24(ref reader),
@@ -189,6 +234,9 @@ public class TableStream : StreamBase
             table.Column3.Unsafe_Read24(ref reader),
             table.Column4.Unsafe_Read24(ref reader),
             table.Column5.Unsafe_Read24(ref reader));
+        row.SetMetadataHeader(mHeader);
+        row.fieldRidList = GetFieldRidList(rid);
+        row.methodRidList = GetMethodRidList(rid);
         return true;
     }
 
@@ -207,7 +255,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawFieldPtrRow(table.Column0.Unsafe_Read24(ref reader));
         return true;
     }
@@ -227,11 +275,13 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawFieldRow(
             reader.ReadUInt16(),
             table.Column1.Unsafe_Read24(ref reader),
             table.Column2.Unsafe_Read24(ref reader));
+        row.SetMetadataHeader(mHeader);
+        row.paramRidList = GetParamRidList(rid);
         return true;
     }
 
@@ -250,7 +300,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawMethodPtrRow(table.Column0.Unsafe_Read24(ref reader));
         return true;
     }
@@ -270,11 +320,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        var mrr = methodRowReader;
-        if (mrr is not null && mrr.TryReadRow(rid, out row))
-            return true;
-
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawMethodRow(
             reader.ReadUInt32(),
             reader.ReadUInt16(),
@@ -282,6 +328,7 @@ public class TableStream : StreamBase
             table.Column3.Unsafe_Read24(ref reader),
             table.Column4.Unsafe_Read24(ref reader),
             table.Column5.Unsafe_Read24(ref reader));
+        row.SetMetadataHeader(mHeader);
         return true;
     }
 
@@ -300,7 +347,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawParamPtrRow(table.Column0.Unsafe_Read24(ref reader));
         return true;
     }
@@ -320,11 +367,12 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawParamRow(
             reader.ReadUInt16(),
             reader.ReadUInt16(),
             table.Column2.Unsafe_Read24(ref reader));
+        row.SetMetadataHeader(mHeader);
         return true;
     }
 
@@ -343,7 +391,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawInterfaceImplRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader));
@@ -365,11 +413,12 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawMemberRefRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader),
             table.Column2.Unsafe_Read24(ref reader));
+        row.SetMetadataHeader(mHeader);
         return true;
     }
 
@@ -388,7 +437,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawConstantRow(
             reader.ReadInt8(),
             reader.ReadInt8(),
@@ -412,7 +461,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawCustomAttributeRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader),
@@ -435,7 +484,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawFieldMarshalRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader));
@@ -457,7 +506,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawDeclSecurityRow(
             (short)reader.ReadUInt16(),
             table.Column1.Unsafe_Read24(ref reader),
@@ -480,7 +529,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawClassLayoutRow(
             reader.ReadUInt16(),
             reader.ReadUInt32(),
@@ -503,7 +552,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawFieldLayoutRow(
             reader.ReadUInt32(),
             table.Column1.Unsafe_Read24(ref reader));
@@ -525,7 +574,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawStandAloneSigRow(table.Column0.Unsafe_Read24(ref reader));
         return true;
     }
@@ -545,7 +594,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawEventMapRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader));
@@ -567,7 +616,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawEventPtrRow(table.Column0.Unsafe_Read24(ref reader));
         return true;
     }
@@ -587,7 +636,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawEventRow(
             reader.ReadUInt16(),
             table.Column1.Unsafe_Read24(ref reader),
@@ -610,7 +659,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawPropertyMapRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader));
@@ -632,7 +681,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawPropertyPtrRow(table.Column0.Unsafe_Read24(ref reader));
         return true;
     }
@@ -652,7 +701,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawPropertyRow(
             reader.ReadUInt16(),
             table.Column1.Unsafe_Read24(ref reader),
@@ -675,7 +724,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawMethodSemanticsRow(
             reader.ReadUInt16(),
             table.Column1.Unsafe_Read24(ref reader),
@@ -698,7 +747,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawMethodImplRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader),
@@ -721,7 +770,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawModuleRefRow(table.Column0.Unsafe_Read24(ref reader));
         return true;
     }
@@ -741,7 +790,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawTypeSpecRow(table.Column0.Unsafe_Read24(ref reader));
         return true;
     }
@@ -761,7 +810,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawImplMapRow(
             reader.ReadUInt16(),
             table.Column1.Unsafe_Read24(ref reader),
@@ -785,7 +834,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawFieldRVARow(
             reader.ReadUInt32(),
             table.Column1.Unsafe_Read24(ref reader));
@@ -807,7 +856,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawENCLogRow(
             reader.ReadUInt32(),
             reader.ReadUInt32());
@@ -829,7 +878,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawENCMapRow(reader.ReadUInt32());
         return true;
     }
@@ -849,7 +898,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawAssemblyRow(
             reader.ReadUInt32(),
             reader.ReadUInt16(),
@@ -878,7 +927,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawAssemblyProcessorRow(reader.ReadUInt32());
         return true;
     }
@@ -898,7 +947,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawAssemblyOSRow(
             reader.ReadUInt32(),
             reader.ReadUInt32(),
@@ -921,7 +970,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawAssemblyRefRow(
             reader.ReadUInt16(),
             reader.ReadUInt16(),
@@ -932,6 +981,7 @@ public class TableStream : StreamBase
             table.Column6.Unsafe_Read24(ref reader),
             table.Column7.Unsafe_Read24(ref reader),
             table.Column8.Unsafe_Read24(ref reader));
+        row.SetMetadataHeader(mHeader);
         return true;
     }
 
@@ -950,7 +1000,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawAssemblyRefProcessorRow(
             reader.ReadUInt32(),
             table.Column1.Unsafe_Read24(ref reader));
@@ -972,7 +1022,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawAssemblyRefOSRow(
             reader.ReadUInt32(),
             reader.ReadUInt32(),
@@ -996,7 +1046,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawFileRow(
             reader.ReadUInt32(),
             table.Column1.Unsafe_Read24(ref reader),
@@ -1019,7 +1069,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawExportedTypeRow(
             reader.ReadUInt32(),
             reader.ReadUInt32(),
@@ -1044,7 +1094,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawManifestResourceRow(
             reader.ReadUInt32(),
             reader.ReadUInt32(),
@@ -1068,7 +1118,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawNestedClassRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader));
@@ -1090,7 +1140,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         if (table.Column4 is null)
         {
             row = new RawGenericParamRow(
@@ -1127,7 +1177,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawMethodSpecRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader));
@@ -1149,7 +1199,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawGenericParamConstraintRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader));
@@ -1171,7 +1221,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawDocumentRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader),
@@ -1195,7 +1245,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawMethodDebugInformationRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader));
@@ -1217,7 +1267,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawLocalScopeRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader),
@@ -1243,7 +1293,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawLocalVariableRow(
             reader.ReadUInt16(),
             reader.ReadUInt16(),
@@ -1266,7 +1316,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawLocalConstantRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader));
@@ -1288,7 +1338,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawImportScopeRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader));
@@ -1310,7 +1360,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawStateMachineMethodRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader));
@@ -1332,7 +1382,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        reader.Position = (rid - 1) * table.tableInfo.size;
+        reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawCustomDebugInformationRow(
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader),
@@ -1367,11 +1417,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        var cr = columnReader;
-        if (cr is not null && cr.ReadColumn(table, rid, column, out value))
-            return true;
-
-        reader.Position = (rid - 1) * table.tableInfo.size + (uint)column.offset;
+        reader.Position = (rid - 1) * table.tableInfo.size + column.offset;
         value = column.Read(ref reader);
         return true;
     }
@@ -1387,11 +1433,7 @@ public class TableStream : StreamBase
             return false;
         }
 
-        var cr = columnReader;
-        if (cr is not null && cr.ReadColumn(table, rid, column, out value))
-            return true;
-
-        reader.Position = (rid - 1) * table.tableInfo.size + (uint)column.offset;
+        reader.Position = (rid - 1) * table.tableInfo.size + column.offset;
         value = column.size == 2 ? reader.ReadUInt16() : reader.ReadUInt32();
         return true;
     }
@@ -1420,12 +1462,12 @@ public class TableStream : StreamBase
         });
         tableInfos[(int)Table.TypeDef] = new TableInfo(Table.TypeDef, "TypeDef", new ColumnInfo[]
         {
-            new ColumnInfo(0, "Flags", ColumnSize.UInt32),
+            new ColumnInfo(0, "Flags", ColumnSize.TypeFlags),
             new ColumnInfo(1, "Name", ColumnSize.Strings),
             new ColumnInfo(2, "Namespace", ColumnSize.Strings),
             new ColumnInfo(3, "Extends", ColumnSize.TypeDefOrRef),
-            new ColumnInfo(4, "FieldList", ColumnSize.Field),
-            new ColumnInfo(5, "MethodList", ColumnSize.Method),
+            new ColumnInfo(4, "FieldList", ColumnSize.FieldList),
+            new ColumnInfo(5, "MethodList", ColumnSize.MethodList),
         });
         tableInfos[(int)Table.FieldPtr] = new TableInfo(Table.FieldPtr, "FieldPtr", new ColumnInfo[]
         {
@@ -1433,7 +1475,7 @@ public class TableStream : StreamBase
         });
         tableInfos[(int)Table.Field] = new TableInfo(Table.Field, "Field", new ColumnInfo[]
         {
-            new ColumnInfo(0, "Flags", ColumnSize.UInt16),
+            new ColumnInfo(0, "Flags", ColumnSize.FieldFlags),
             new ColumnInfo(1, "Name", ColumnSize.Strings),
             new ColumnInfo(2, "Signature", ColumnSize.Blob),
         });
@@ -1445,7 +1487,7 @@ public class TableStream : StreamBase
         {
             new ColumnInfo(0, "RVA", ColumnSize.UInt32),
             new ColumnInfo(1, "ImplFlags", ColumnSize.UInt16),
-            new ColumnInfo(2, "Flags", ColumnSize.UInt16),
+            new ColumnInfo(2, "Flags", ColumnSize.MethodFlags),
             new ColumnInfo(3, "Name", ColumnSize.Strings),
             new ColumnInfo(4, "Signature", ColumnSize.Blob),
             new ColumnInfo(5, "ParamList", ColumnSize.Param),

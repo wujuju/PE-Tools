@@ -1,7 +1,9 @@
+using System;
+
 /// <summary>
 /// Raw contents of an uncompressed Module table row
 /// </summary>
-public readonly struct RawModuleRow
+public class RawModuleRow
 {
     public readonly ushort Generation;
     public readonly uint Name;
@@ -38,7 +40,7 @@ public readonly struct RawModuleRow
 /// <summary>
 /// Raw contents of an uncompressed TypeRef table row
 /// </summary>
-public readonly struct RawTypeRefRow
+public class RawTypeRefRow
 {
     public readonly uint ResolutionScope;
     public readonly uint Name;
@@ -51,6 +53,21 @@ public readonly struct RawTypeRefRow
         this.Namespace = Namespace;
     }
 
+    public string name;
+    public string nameSpace;
+    public void SetMetadataHeader(MetadataHeader header)
+    {
+        name = header.StringHeapStream.Read(Name);
+        nameSpace = header.StringHeapStream.Read(Namespace);
+    }
+
+    public string ToString()
+    {
+        if (nameSpace.Length == 0)
+            return name;
+        return String.Format("[{1}]{0}", name, nameSpace);
+    }
+    
     /// <summary>
     /// Gets a column
     /// </summary>
@@ -69,7 +86,7 @@ public readonly struct RawTypeRefRow
 /// <summary>
 /// Raw contents of an uncompressed TypeDef table row
 /// </summary>
-public readonly struct RawTypeDefRow
+public class RawTypeDefRow
 {
     public readonly uint Flags;
     public readonly uint Name;
@@ -77,6 +94,8 @@ public readonly struct RawTypeDefRow
     public readonly uint Extends;
     public readonly uint FieldList;
     public readonly uint MethodList;
+    public RidList fieldRidList;
+    public RidList methodRidList;
 
     public RawTypeDefRow(uint Flags, uint Name, uint Namespace, uint Extends, uint FieldList, uint MethodList)
     {
@@ -88,6 +107,14 @@ public readonly struct RawTypeDefRow
         this.MethodList = MethodList;
     }
 
+    public string name;
+    public string nameSpace;
+    public void SetMetadataHeader(MetadataHeader header)
+    {
+        name = header.StringHeapStream.Read(Name);
+        nameSpace = header.StringHeapStream.Read(Namespace);
+    }
+    
     /// <summary>
     /// Gets a column
     /// </summary>
@@ -109,7 +136,7 @@ public readonly struct RawTypeDefRow
 /// <summary>
 /// Raw contents of an uncompressed FieldPtr table row
 /// </summary>
-public readonly struct RawFieldPtrRow
+public class RawFieldPtrRow
 {
     public readonly uint Field;
 
@@ -131,17 +158,28 @@ public readonly struct RawFieldPtrRow
 /// <summary>
 /// Raw contents of an uncompressed Field table row
 /// </summary>
-public readonly struct RawFieldRow
+public class RawFieldRow
 {
     public readonly ushort Flags;
     public readonly uint Name;
     public readonly uint Signature;
-
+    public RidList paramRidList;
     public RawFieldRow(ushort Flags, uint Name, uint Signature)
     {
         this.Flags = Flags;
         this.Name = Name;
         this.Signature = Signature;
+    }
+    
+    public string name;
+    public void SetMetadataHeader(MetadataHeader header)
+    {
+        name = header.StringHeapStream.Read(Name);
+    }
+
+    public string ToString()
+    {
+        return name;
     }
 
     /// <summary>
@@ -162,7 +200,7 @@ public readonly struct RawFieldRow
 /// <summary>
 /// Raw contents of an uncompressed MethodPtr table row
 /// </summary>
-public readonly struct RawMethodPtrRow
+public class RawMethodPtrRow
 {
     public readonly uint Method;
 
@@ -184,7 +222,7 @@ public readonly struct RawMethodPtrRow
 /// <summary>
 /// Raw contents of an uncompressed Method table row
 /// </summary>
-public readonly struct RawMethodRow
+public class RawMethodRow
 {
     public readonly uint RVA;
     public readonly ushort ImplFlags;
@@ -203,6 +241,16 @@ public readonly struct RawMethodRow
         this.ParamList = ParamList;
     }
 
+    public string name;
+    public void SetMetadataHeader(MetadataHeader header)
+    {
+        name = header.StringHeapStream.Read(Name);
+    }
+
+    public string ToString()
+    {
+        return name;
+    }
     /// <summary>
     /// Gets a column
     /// </summary>
@@ -224,7 +272,7 @@ public readonly struct RawMethodRow
 /// <summary>
 /// Raw contents of an uncompressed ParamPtr table row
 /// </summary>
-public readonly struct RawParamPtrRow
+public class RawParamPtrRow
 {
     public readonly uint Param;
 
@@ -246,7 +294,7 @@ public readonly struct RawParamPtrRow
 /// <summary>
 /// Raw contents of an uncompressed Param table row
 /// </summary>
-public readonly struct RawParamRow
+public class RawParamRow
 {
     public readonly ushort Flags;
     public readonly ushort Sequence;
@@ -259,6 +307,17 @@ public readonly struct RawParamRow
         this.Name = Name;
     }
 
+    
+    public string name;
+    public void SetMetadataHeader(MetadataHeader header)
+    {
+        name = header.StringHeapStream.Read(Name);
+    }
+
+    public string ToString()
+    {
+        return name;
+    }
     /// <summary>
     /// Gets a column
     /// </summary>
@@ -277,7 +336,7 @@ public readonly struct RawParamRow
 /// <summary>
 /// Raw contents of an uncompressed InterfaceImpl table row
 /// </summary>
-public readonly struct RawInterfaceImplRow
+public class RawInterfaceImplRow
 {
     public readonly uint Class;
     public readonly uint Interface;
@@ -305,7 +364,7 @@ public readonly struct RawInterfaceImplRow
 /// <summary>
 /// Raw contents of an uncompressed MemberRef table row
 /// </summary>
-public readonly struct RawMemberRefRow
+public class RawMemberRefRow
 {
     public readonly uint Class;
     public readonly uint Name;
@@ -316,6 +375,12 @@ public readonly struct RawMemberRefRow
         this.Class = Class;
         this.Name = Name;
         this.Signature = Signature;
+    }
+    
+    public string name;
+    public void SetMetadataHeader(MetadataHeader header)
+    {
+        name = header.StringHeapStream.Read(Name);
     }
 
     /// <summary>
@@ -336,7 +401,7 @@ public readonly struct RawMemberRefRow
 /// <summary>
 /// Raw contents of an uncompressed Constant table row
 /// </summary>
-public readonly struct RawConstantRow
+public class RawConstantRow
 {
     public readonly byte Type;
     public readonly byte Padding;
@@ -370,7 +435,7 @@ public readonly struct RawConstantRow
 /// <summary>
 /// Raw contents of an uncompressed CustomAttribute table row
 /// </summary>
-public readonly struct RawCustomAttributeRow
+public class RawCustomAttributeRow
 {
     public readonly uint Parent;
     public readonly uint Type;
@@ -401,7 +466,7 @@ public readonly struct RawCustomAttributeRow
 /// <summary>
 /// Raw contents of an uncompressed FieldMarshal table row
 /// </summary>
-public readonly struct RawFieldMarshalRow
+public class RawFieldMarshalRow
 {
     public readonly uint Parent;
     public readonly uint NativeType;
@@ -429,7 +494,7 @@ public readonly struct RawFieldMarshalRow
 /// <summary>
 /// Raw contents of an uncompressed DeclSecurity table row
 /// </summary>
-public readonly struct RawDeclSecurityRow
+public class RawDeclSecurityRow
 {
     public readonly short Action;
     public readonly uint Parent;
@@ -460,7 +525,7 @@ public readonly struct RawDeclSecurityRow
 /// <summary>
 /// Raw contents of an uncompressed ClassLayout table row
 /// </summary>
-public readonly struct RawClassLayoutRow
+public class RawClassLayoutRow
 {
     public readonly ushort PackingSize;
     public readonly uint ClassSize;
@@ -491,7 +556,7 @@ public readonly struct RawClassLayoutRow
 /// <summary>
 /// Raw contents of an uncompressed FieldLayout table row
 /// </summary>
-public readonly struct RawFieldLayoutRow
+public class RawFieldLayoutRow
 {
     public readonly uint OffSet;
     public readonly uint Field;
@@ -519,7 +584,7 @@ public readonly struct RawFieldLayoutRow
 /// <summary>
 /// Raw contents of an uncompressed StandAloneSig table row
 /// </summary>
-public readonly struct RawStandAloneSigRow
+public class RawStandAloneSigRow
 {
     public readonly uint Signature;
 
@@ -541,7 +606,7 @@ public readonly struct RawStandAloneSigRow
 /// <summary>
 /// Raw contents of an uncompressed EventMap table row
 /// </summary>
-public readonly struct RawEventMapRow
+public class RawEventMapRow
 {
     public readonly uint Parent;
     public readonly uint EventList;
@@ -569,7 +634,7 @@ public readonly struct RawEventMapRow
 /// <summary>
 /// Raw contents of an uncompressed EventPtr table row
 /// </summary>
-public readonly struct RawEventPtrRow
+public class RawEventPtrRow
 {
     public readonly uint Event;
 
@@ -591,7 +656,7 @@ public readonly struct RawEventPtrRow
 /// <summary>
 /// Raw contents of an uncompressed Event table row
 /// </summary>
-public readonly struct RawEventRow
+public class RawEventRow
 {
     public readonly ushort EventFlags;
     public readonly uint Name;
@@ -622,7 +687,7 @@ public readonly struct RawEventRow
 /// <summary>
 /// Raw contents of an uncompressed PropertyMap table row
 /// </summary>
-public readonly struct RawPropertyMapRow
+public class RawPropertyMapRow
 {
     public readonly uint Parent;
     public readonly uint PropertyList;
@@ -650,7 +715,7 @@ public readonly struct RawPropertyMapRow
 /// <summary>
 /// Raw contents of an uncompressed PropertyPtr table row
 /// </summary>
-public readonly struct RawPropertyPtrRow
+public class RawPropertyPtrRow
 {
     public readonly uint Property;
 
@@ -672,7 +737,7 @@ public readonly struct RawPropertyPtrRow
 /// <summary>
 /// Raw contents of an uncompressed Property table row
 /// </summary>
-public readonly struct RawPropertyRow
+public class RawPropertyRow
 {
     public readonly ushort PropFlags;
     public readonly uint Name;
@@ -703,7 +768,7 @@ public readonly struct RawPropertyRow
 /// <summary>
 /// Raw contents of an uncompressed MethodSemantics table row
 /// </summary>
-public readonly struct RawMethodSemanticsRow
+public class RawMethodSemanticsRow
 {
     public readonly ushort Semantic;
     public readonly uint Method;
@@ -734,7 +799,7 @@ public readonly struct RawMethodSemanticsRow
 /// <summary>
 /// Raw contents of an uncompressed MethodImpl table row
 /// </summary>
-public readonly struct RawMethodImplRow
+public class RawMethodImplRow
 {
     public readonly uint Class;
     public readonly uint MethodBody;
@@ -765,7 +830,7 @@ public readonly struct RawMethodImplRow
 /// <summary>
 /// Raw contents of an uncompressed ModuleRef table row
 /// </summary>
-public readonly struct RawModuleRefRow
+public class RawModuleRefRow
 {
     public readonly uint Name;
 
@@ -787,7 +852,7 @@ public readonly struct RawModuleRefRow
 /// <summary>
 /// Raw contents of an uncompressed TypeSpec table row
 /// </summary>
-public readonly struct RawTypeSpecRow
+public class RawTypeSpecRow
 {
     public readonly uint Signature;
 
@@ -809,7 +874,7 @@ public readonly struct RawTypeSpecRow
 /// <summary>
 /// Raw contents of an uncompressed ImplMap table row
 /// </summary>
-public readonly struct RawImplMapRow
+public class RawImplMapRow
 {
     public readonly ushort MappingFlags;
     public readonly uint MemberForwarded;
@@ -843,7 +908,7 @@ public readonly struct RawImplMapRow
 /// <summary>
 /// Raw contents of an uncompressed FieldRVA table row
 /// </summary>
-public readonly struct RawFieldRVARow
+public class RawFieldRVARow
 {
     public readonly uint RVA;
     public readonly uint Field;
@@ -871,7 +936,7 @@ public readonly struct RawFieldRVARow
 /// <summary>
 /// Raw contents of an uncompressed ENCLog table row
 /// </summary>
-public readonly struct RawENCLogRow
+public class RawENCLogRow
 {
     public readonly uint Token;
     public readonly uint FuncCode;
@@ -899,7 +964,7 @@ public readonly struct RawENCLogRow
 /// <summary>
 /// Raw contents of an uncompressed ENCMap table row
 /// </summary>
-public readonly struct RawENCMapRow
+public class RawENCMapRow
 {
     public readonly uint Token;
 
@@ -921,7 +986,7 @@ public readonly struct RawENCMapRow
 /// <summary>
 /// Raw contents of an uncompressed Assembly table row
 /// </summary>
-public readonly struct RawAssemblyRow
+public class RawAssemblyRow
 {
     public readonly uint HashAlgId;
     public readonly ushort MajorVersion;
@@ -971,7 +1036,7 @@ public readonly struct RawAssemblyRow
 /// <summary>
 /// Raw contents of an uncompressed AssemblyProcessor table row
 /// </summary>
-public readonly struct RawAssemblyProcessorRow
+public class RawAssemblyProcessorRow
 {
     public readonly uint Processor;
 
@@ -993,7 +1058,7 @@ public readonly struct RawAssemblyProcessorRow
 /// <summary>
 /// Raw contents of an uncompressed AssemblyOS table row
 /// </summary>
-public readonly struct RawAssemblyOSRow
+public class RawAssemblyOSRow
 {
     public readonly uint OSPlatformId;
     public readonly uint OSMajorVersion;
@@ -1024,7 +1089,7 @@ public readonly struct RawAssemblyOSRow
 /// <summary>
 /// Raw contents of an uncompressed AssemblyRef table row
 /// </summary>
-public readonly struct RawAssemblyRefRow
+public class RawAssemblyRefRow
 {
     public readonly ushort MajorVersion;
     public readonly ushort MinorVersion;
@@ -1048,6 +1113,17 @@ public readonly struct RawAssemblyRefRow
         this.Name = Name;
         this.Locale = Locale;
         this.HashValue = HashValue;
+    }
+    
+    public string name;
+    public void SetMetadataHeader(MetadataHeader header)
+    {
+        name = header.StringHeapStream.Read(Name);
+    }
+
+    public string ToString()
+    {
+        return name;
     }
 
     /// <summary>
@@ -1074,7 +1150,7 @@ public readonly struct RawAssemblyRefRow
 /// <summary>
 /// Raw contents of an uncompressed AssemblyRefProcessor table row
 /// </summary>
-public readonly struct RawAssemblyRefProcessorRow
+public class RawAssemblyRefProcessorRow
 {
     public readonly uint Processor;
     public readonly uint AssemblyRef;
@@ -1102,7 +1178,7 @@ public readonly struct RawAssemblyRefProcessorRow
 /// <summary>
 /// Raw contents of an uncompressed AssemblyRefOS table row
 /// </summary>
-public readonly struct RawAssemblyRefOSRow
+public class RawAssemblyRefOSRow
 {
     public readonly uint OSPlatformId;
     public readonly uint OSMajorVersion;
@@ -1136,7 +1212,7 @@ public readonly struct RawAssemblyRefOSRow
 /// <summary>
 /// Raw contents of an uncompressed File table row
 /// </summary>
-public readonly struct RawFileRow
+public class RawFileRow
 {
     public readonly uint Flags;
     public readonly uint Name;
@@ -1167,7 +1243,7 @@ public readonly struct RawFileRow
 /// <summary>
 /// Raw contents of an uncompressed ExportedType table row
 /// </summary>
-public readonly struct RawExportedTypeRow
+public class RawExportedTypeRow
 {
     public readonly uint Flags;
     public readonly uint TypeDefId;
@@ -1204,7 +1280,7 @@ public readonly struct RawExportedTypeRow
 /// <summary>
 /// Raw contents of an uncompressed ManifestResource table row
 /// </summary>
-public readonly struct RawManifestResourceRow
+public class RawManifestResourceRow
 {
     public readonly uint Offset;
     public readonly uint Flags;
@@ -1238,7 +1314,7 @@ public readonly struct RawManifestResourceRow
 /// <summary>
 /// Raw contents of an uncompressed NestedClass table row
 /// </summary>
-public readonly struct RawNestedClassRow
+public class RawNestedClassRow
 {
     public readonly uint NestedClass;
     public readonly uint EnclosingClass;
@@ -1266,7 +1342,7 @@ public readonly struct RawNestedClassRow
 /// <summary>
 /// Raw contents of an uncompressed GenericParam table row
 /// </summary>
-public readonly struct RawGenericParamRow
+public class RawGenericParamRow
 {
     public readonly ushort Number;
     public readonly ushort Flags;
@@ -1312,7 +1388,7 @@ public readonly struct RawGenericParamRow
 /// <summary>
 /// Raw contents of an uncompressed MethodSpec table row
 /// </summary>
-public readonly struct RawMethodSpecRow
+public class RawMethodSpecRow
 {
     public readonly uint Method;
     public readonly uint Instantiation;
@@ -1340,7 +1416,7 @@ public readonly struct RawMethodSpecRow
 /// <summary>
 /// Raw contents of an uncompressed GenericParamConstraint table row
 /// </summary>
-public readonly struct RawGenericParamConstraintRow
+public class RawGenericParamConstraintRow
 {
     public readonly uint Owner;
     public readonly uint Constraint;
@@ -1368,7 +1444,7 @@ public readonly struct RawGenericParamConstraintRow
 /// <summary>
 /// Raw contents of an uncompressed Document table row
 /// </summary>
-public readonly struct RawDocumentRow
+public class RawDocumentRow
 {
     public readonly uint Name;
     public readonly uint HashAlgorithm;
@@ -1402,7 +1478,7 @@ public readonly struct RawDocumentRow
 /// <summary>
 /// Raw contents of an uncompressed MethodDebugInformation table row
 /// </summary>
-public readonly struct RawMethodDebugInformationRow
+public class RawMethodDebugInformationRow
 {
     public readonly uint Document;
     public readonly uint SequencePoints;
@@ -1430,7 +1506,7 @@ public readonly struct RawMethodDebugInformationRow
 /// <summary>
 /// Raw contents of an uncompressed LocalScope table row
 /// </summary>
-public readonly struct RawLocalScopeRow
+public class RawLocalScopeRow
 {
     public readonly uint Method;
     public readonly uint ImportScope;
@@ -1471,7 +1547,7 @@ public readonly struct RawLocalScopeRow
 /// <summary>
 /// Raw contents of an uncompressed LocalVariable table row
 /// </summary>
-public readonly struct RawLocalVariableRow
+public class RawLocalVariableRow
 {
     public readonly ushort Attributes;
     public readonly ushort Index;
@@ -1502,7 +1578,7 @@ public readonly struct RawLocalVariableRow
 /// <summary>
 /// Raw contents of an uncompressed LocalConstant table row
 /// </summary>
-public readonly struct RawLocalConstantRow
+public class RawLocalConstantRow
 {
     public readonly uint Name;
     public readonly uint Signature;
@@ -1530,7 +1606,7 @@ public readonly struct RawLocalConstantRow
 /// <summary>
 /// Raw contents of an uncompressed ImportScope table row
 /// </summary>
-public readonly struct RawImportScopeRow
+public class RawImportScopeRow
 {
     public readonly uint Parent;
     public readonly uint Imports;
@@ -1558,7 +1634,7 @@ public readonly struct RawImportScopeRow
 /// <summary>
 /// Raw contents of an uncompressed StateMachineMethod table row
 /// </summary>
-public readonly struct RawStateMachineMethodRow
+public class RawStateMachineMethodRow
 {
     public readonly uint MoveNextMethod;
     public readonly uint KickoffMethod;
@@ -1586,7 +1662,7 @@ public readonly struct RawStateMachineMethodRow
 /// <summary>
 /// Raw contents of an uncompressed CustomDebugInformation table row
 /// </summary>
-public readonly struct RawCustomDebugInformationRow
+public class RawCustomDebugInformationRow
 {
     public readonly uint Parent;
     public readonly uint Kind;

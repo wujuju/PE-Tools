@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -51,22 +52,11 @@ namespace PE_Tools
             this.Controls.Add(ms);
             this.ResumeLayout(false);
 
-            // string ss = @"";
-            // string[] stringSeparators = new string[] { "\r\n" };
-            // string[] lines = ss.Split(stringSeparators, StringSplitOptions.None);
-            // for (int i = 0; i < lines.Length; i += 3)
-            // {
-            //     if (i + 2 >= lines.Length)
-            //         break;
-            //     Console.WriteLine(lines[i] + "=" + lines[i + 1] + ",//" + lines[i + 2]);
-            // }
-
             this.AllowDrop = true;
             this.DragDrop += Form1_DragDrop;
             this.DragEnter += Form1_DragEnter;
-            // OpenPE(@"C:\Users\yangyang.he\Desktop\MAA\mkldnn.dll");
-            // OpenPE(@"C:\work\reversecore\example\02\15\bin\notepad_upx.exe");
-            OpenPE(@"C:\hybridclr_trial\Assets\StreamingAssets\Assembly-CSharp.dll.bytes");
+            OpenPE(@"C:\fanmeta-tklua\Assets\Source\Client\AppClient~\bin\Debug\AppClient.dll");
+            // OpenPE(@"C:\hybridclr_trial\Assets\StreamingAssets\Assembly-CSharp.dll.bytes");
         }
 
         private void Form1_DragEnter(object sender, DragEventArgs e) //解析信息
@@ -174,9 +164,50 @@ namespace PE_Tools
             songsDataGridView.RowHeadersVisible = false;
             songsDataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             tabPage1.Controls.Add(songsDataGridView);
-            songsDataGridView.DataSource = info.TableSectionData();
+            songsDataGridView.DataSource = TableSectionData();
         }
 
+        public DataTable TableSectionData()
+        {
+            DataTable ReturnTable = new DataTable("");
+            ReturnTable.Columns.Add("Name");
+            ReturnTable.Columns.Add("Size");
+            ReturnTable.Columns.Add("Value16");
+            ReturnTable.Columns.Add("Value10");
+            ReturnTable.Columns.Add("ASCII");
+            ReturnTable.Columns.Add("Describe");
+
+            for (int k = 0; k != info._SectionTable.Section.Count; k++)
+            {
+                SectionData SectionDate = (SectionData)info._SectionTable.Section[k];
+                Type clsType = SectionDate.GetType();
+                var fields = clsType.GetFields();
+                for (int i = 0; i < fields.Length; i++)
+                {
+                    var field = fields[i];
+                    var attribute = field.GetCustomAttributes(false);
+                    if (attribute.Length == 0)
+                        continue;
+                    HeadAttribute dmAttr = (HeadAttribute)field.GetCustomAttributes(false)[0];
+                    AddTableRow(ReturnTable, field.GetValue(SectionDate) as byte[], field.Name, dmAttr.name);
+                }
+            }
+
+            return ReturnTable;
+        }
+    
+        private void AddTableRow(DataTable RefTable, byte[] Data, string Name, string Describe)
+        {
+            RefTable.Rows.Add(new string[]
+            {
+                Name,
+                Data.Length.ToString(),
+                PETools.GetHexString(Data),
+                PETools.GetUint(Data).ToString(),
+                PETools.GetHexString(Data, "ASCII"),
+                Describe
+            });
+        }
         void CreateDirDataPanel(TabPage tabPage1)
         {
             DataGridView songsDataGridView = new DataGridView();
@@ -200,10 +231,61 @@ namespace PE_Tools
             }
 
             tabPage1.Controls.Add(songsDataGridView);
-            songsDataGridView.DataSource = info.TableOptionalDirAttrib();
+            songsDataGridView.DataSource = TableOptionalDirAttrib();
             OnDirBtnClick(tabPage1.Controls.Find("CLR",false)[0], null);
         }
 
+        public DataTable TableOptionalDirAttrib()
+        {
+            DataTable ReturnTable = new DataTable("");
+            ReturnTable.Columns.Add("Name");
+            ReturnTable.Columns.Add("RVA(16)");
+            ReturnTable.Columns.Add("RVA(10)");
+            ReturnTable.Columns.Add("Size(16)");
+            ReturnTable.Columns.Add("Size(10)");
+
+            Hashtable TableName = new Hashtable();
+
+            TableName.Add("0", "导出表");
+            TableName.Add("1", "导入表");
+            TableName.Add("2", "资源表");
+            TableName.Add("3", "异常表");
+            TableName.Add("4", "安全表");
+            TableName.Add("5", "基本重定位表");
+            TableName.Add("6", "调试数据");
+            TableName.Add("7", "版权数据");
+            TableName.Add("8", "全局PTR");
+            TableName.Add("9", "TLS表");
+            TableName.Add("10", "加载配置表");
+            TableName.Add("11", "绑定导入");
+            TableName.Add("12", "IAT");
+            TableName.Add("13", "延迟导入描述符");
+            TableName.Add("14", "CLR 运行时标头");
+            TableName.Add("15", "保留，必须为零");
+
+            for (int i = 0; i != info._OptionalDirAttrib.DirByte.Count; i++)
+            {
+                DirAttrib MyDirByte = (DirAttrib)info._OptionalDirAttrib.DirByte[i];
+                string Name = TableName[i.ToString()].ToString();
+
+                AddTableRow2(ReturnTable, Name, MyDirByte.DirRva, MyDirByte.DirSize);
+            }
+
+            return ReturnTable;
+        }
+        
+        private DataRow AddTableRow2(DataTable RefTable, string Name, byte[] Data, byte[] Size)
+        {
+            return RefTable.Rows.Add(new string[]
+            {
+                Name,
+                PETools.GetHexString(Data),
+                PETools.GetInt(Data).ToString(),
+                PETools.GetHexString(Size),
+                PETools.GetInt(Size).ToString()
+            });
+        }
+        
         void OnDirBtnClick(object sender, EventArgs e)
         {
             Button bntinfo = sender as Button;
@@ -277,7 +359,7 @@ namespace PE_Tools
                 text.Size = new Size(rowWidth, 21);
                 if (dmAttr.tpyeName != "")
                 {
-                    var intValue = PeInfo.GetInt2(field.GetValue(obj) as byte[]);
+                    var intValue = PETools.GetInt(field.GetValue(obj) as byte[]);
                     switch (dmAttr.tpyeName)
                     {
                         case "EnMagic":
@@ -296,7 +378,7 @@ namespace PE_Tools
                             CreateComboBox(typeof(EnImageCharacteristic), text, control, label1, intValue);
                             continue;
                         case "String":
-                            text.Text = PeInfo.GetString(field.GetValue(obj) as byte[], "ASCII");
+                            text.Text = PETools.GetHexString(field.GetValue(obj) as byte[], "ASCII");
                             break;
                         case "Time":
                             var ms_date1970 = new DateTime(1970, 1, 1, 0, 0, 0);
@@ -306,7 +388,7 @@ namespace PE_Tools
                     }
                 }
                 else
-                    text.Text = PeInfo.GetString(field.GetValue(obj) as byte[]);
+                    text.Text = PETools.GetHexString(field.GetValue(obj) as byte[]);
 
                 control.Add(label1);
                 control.Add(text);

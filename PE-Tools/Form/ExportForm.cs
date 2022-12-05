@@ -44,10 +44,10 @@ namespace PE_Tools
             {
                 ReturnTable.Rows.Add(new string[]
                 {
-                    PeInfo.GetInt(data.AddressOfNameOrdinalsList[i]),
-                    PeInfo.GetString(data.AddressOfFunctionsList[i]),
-                    PeInfo.GetString(data.AddressOfNamesList[i]),
-                    PeInfo.GetString(data.NameList[i], "ASCII")
+                    PETools.GetInt(data.AddressOfNameOrdinalsList[i]).ToString(),
+                    PETools.GetHexString(data.AddressOfFunctionsList[i]),
+                    PETools.GetHexString(data.AddressOfNamesList[i]),
+                    PETools.GetHexString(data.NameList[i], "ASCII")
                 });
             }
 

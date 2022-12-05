@@ -312,14 +312,33 @@ public class ImportForm : System.Windows.Forms.Form
         }
 
 
-        importFunctionList = info.TableImportFunction();
+        importFunctionList = TableImportFunction();
         foreach (var importDate in info._ImportDirectory.ImportList)
         {
-            listBox1.Items.Add(PeInfo.GetString(importDate.DLLName, "ASCII"));
+            listBox1.Items.Add(PETools.GetHexString(importDate.DLLName, "ASCII"));
         }
 
         listBox1.SelectedIndexChanged += OnListSelectedIndexChanged;
         listBox1.SelectedIndex = 0;
+    }
+
+    public Dictionary<string, List<ImportDirectory.ImportDate.FunctionList>> TableImportFunction()
+    {
+        Dictionary<string, List<ImportDirectory.ImportDate.FunctionList>> dictionary =
+            new Dictionary<string, List<ImportDirectory.ImportDate.FunctionList>>();
+        for (int i = 0; i != info._ImportDirectory.ImportList.Count; i++)
+        {
+            ImportDirectory.ImportDate ImportByte = info._ImportDirectory.ImportList[i];
+            var list = dictionary[PETools.GetHexString(ImportByte.DLLName, "ASCII")] =
+                new List<ImportDirectory.ImportDate.FunctionList>();
+            for (int z = 0; z != ImportByte.DllFunctionList.Count; z++)
+            {
+                ImportDirectory.ImportDate.FunctionList Function = ImportByte.DllFunctionList[z];
+                list.Add(Function);
+            }
+        }
+
+        return dictionary;
     }
 
     void OnListSelectedIndexChanged(object sender, EventArgs e)
@@ -342,7 +361,7 @@ public class ImportForm : System.Windows.Forms.Form
             list3.MoveNext();
             var text = list2.Current as TextBox;
             HeadAttribute dmAttr = (HeadAttribute)attributes[0];
-            text.Text = PeInfo.GetString(field.GetValue(importData) as byte[]);
+            text.Text = PETools.GetHexString(field.GetValue(importData) as byte[]);
             var label = list3.Current as Label;
             label.Text = dmAttr.name;
         }
@@ -360,8 +379,8 @@ public class ImportForm : System.Windows.Forms.Form
                 var fun = functionLists[j];
                 ReturnTable.Rows.Add(new string[]
                 {
-                    PeInfo.GetString(fun.FunctionHead),
-                    PeInfo.GetString(fun.FunctionName, "ASCII"),
+                    PETools.GetHexString(fun.FunctionHead),
+                    PETools.GetHexString(fun.FunctionName, "ASCII"),
                 });
             }
 

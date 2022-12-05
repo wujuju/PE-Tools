@@ -255,6 +255,7 @@ public enum Table : byte
 }
 
 public enum ColumnSize : byte {
+		None,
 		/// <summary>RID into Module table</summary>
 		Module,
 		/// <summary>RID into TypeRef table</summary>
@@ -265,10 +266,12 @@ public enum ColumnSize : byte {
 		FieldPtr,
 		/// <summary>RID into Field table</summary>
 		Field,
+		FieldList,
 		/// <summary>RID into MethodPtr table</summary>
 		MethodPtr,
 		/// <summary>RID into Method table</summary>
 		Method,
+		MethodList,
 		/// <summary>RID into ParamPtr table</summary>
 		ParamPtr,
 		/// <summary>RID into Param table</summary>
@@ -371,6 +374,9 @@ public enum ColumnSize : byte {
 		Int32,
 		/// <summary>32-bit unsigned int</summary>
 		UInt32,
+		TypeFlags,
+		FieldFlags,
+		MethodFlags,
 		/// <summary>Index into #Strings stream</summary>
 		Strings,
 		/// <summary>Index into #GUID stream</summary>

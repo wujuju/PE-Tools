@@ -32,6 +32,10 @@ public class ShortAttribute : Attribute
 {
 }
 
+public class UintAttribute : Attribute
+{
+}
+
 public class IntAttribute : Attribute
 {
 }
