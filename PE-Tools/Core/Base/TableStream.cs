@@ -87,27 +87,60 @@ public partial class TableStream : StreamBase
     SimpleLazyList<RawMethodSpecRow> listMethodSpecMD;
     SimpleLazyList<RawGenericParamConstraintRow> listGenericParamConstraintMD;
     SimpleLazyList<RawParamRow> listParamDefMD;
-    private MetadataHeader mHeader;
 
-    public void Initialize(MetadataHeader header)
+    public void Initialize()
     {
-        this.mHeader = header;
         listModuleDefMD = new SimpleLazyList<RawModuleRow>(ModuleTable.numRows,
             rid2 => TryReadModuleRow(rid2, out var row) ? row : null);
         listTypeRefMD = new SimpleLazyList<RawTypeRefRow>(TypeRefTable.numRows,
             rid2 => TryReadTypeRefRow(rid2, out var row) ? row : null);
-        listTypeDefMD = new SimpleLazyList<RawTypeDefRow>(TypeDefTable.numRows,
-            rid2 => TryReadTypeDefRow(rid2, out var row) ? row : null);
         listFieldDefMD = new SimpleLazyList<RawFieldRow>(FieldTable.numRows,
             rid2 => TryReadFieldRow(rid2, out var row) ? row : null);
-        listMethodDefMD = new SimpleLazyList<RawMethodRow>(MethodTable.numRows,
-            rid2 => TryReadMethodRow(rid2, out var row) ? row : null);
         listMemberRefMD = new SimpleLazyList<RawMemberRefRow>(MemberRefTable.numRows, (rid2) =>
             TryReadMemberRefRow(rid2, out var row) ? row : null);
         listAssemblyRefMD = new SimpleLazyList<RawAssemblyRefRow>(AssemblyRefTable.numRows,
             rid2 => TryReadAssemblyRefRow(rid2, out var row) ? row : null);
         listParamDefMD = new SimpleLazyList<RawParamRow>(ParamTable.numRows,
             rid2 => TryReadParamRow(rid2, out var row) ? row : null);
+        listMethodSpecMD = new SimpleLazyList<RawMethodSpecRow>(MethodSpecTable.numRows,
+            rid2 => TryReadMethodSpecRow(rid2, out var row) ? row : null);
+        listGenericParamConstraintMD = new SimpleLazyList<RawGenericParamConstraintRow>(GenericParamConstraintTable.numRows,
+            rid2 => TryReadGenericParamConstraintRow(rid2, out var row) ? row : null);
+        listGenericParamMD = new SimpleLazyList<RawGenericParamRow>(GenericParamTable.numRows,
+            rid2 => TryReadGenericParamRow(rid2, out var row) ? row : null);
+        listManifestResourceMD = new SimpleLazyList<RawManifestResourceRow>(ManifestResourceTable.numRows,
+            rid2 => TryReadManifestResourceRow(rid2, out var row) ? row : null);
+        listExportedTypeMD = new SimpleLazyList<RawExportedTypeRow>(ExportedTypeTable.numRows,
+            rid2 => TryReadExportedTypeRow(rid2, out var row) ? row : null);
+        listFileDefMD= new SimpleLazyList<RawFileRow>(FileTable.numRows,
+            rid2 => TryReadFileRow(rid2, out var row) ? row : null);
+        listAssemblyDefMD= new SimpleLazyList<RawAssemblyRow>(AssemblyTable.numRows,
+            rid2 => TryReadAssemblyRow(rid2, out var row) ? row : null);
+        listImplMapMD= new SimpleLazyList<RawImplMapRow>(ImplMapTable.numRows,
+            rid2 => TryReadImplMapRow(rid2, out var row) ? row : null);
+        listTypeSpecMD = new SimpleLazyList<RawTypeSpecRow>(TypeSpecTable.numRows,
+            rid2 => TryReadTypeSpecRow(rid2, out var row) ? row : null);
+        listModuleRefMD = new SimpleLazyList<RawModuleRefRow>(ModuleRefTable.numRows,
+            rid2 => TryReadModuleRefRow(rid2, out var row) ? row : null);
+        listPropertyDefMD = new SimpleLazyList<RawPropertyRow>(PropertyTable.numRows,
+            rid2 => TryReadPropertyRow(rid2, out var row) ? row : null);
+        listEventDefMD = new SimpleLazyList<RawEventRow>(EventTable.numRows,
+            rid2 => TryReadEventRow(rid2, out var row) ? row : null);
+        listStandAloneSigMD = new SimpleLazyList<RawStandAloneSigRow>(StandAloneSigTable.numRows,
+            rid2 => TryReadStandAloneSigRow(rid2, out var row) ? row : null);
+        listClassLayoutMD = new SimpleLazyList<RawClassLayoutRow>(ClassLayoutTable.numRows,
+            rid2 => TryReadClassLayoutRow(rid2, out var row) ? row : null);
+        listDeclSecurityMD = new SimpleLazyList<RawDeclSecurityRow>(DeclSecurityTable.numRows,
+            rid2 => TryReadDeclSecurityRow(rid2, out var row) ? row : null);
+        listConstantMD = new SimpleLazyList<RawConstantRow>(ConstantTable.numRows,
+            rid2 => TryReadConstantRow(rid2, out var row) ? row : null);
+        listInterfaceImplMD = new SimpleLazyList<RawInterfaceImplRow>(InterfaceImplTable.numRows,
+            rid2 => TryReadInterfaceImplRow(rid2, out var row) ? row : null);
+        //必须最后处理
+        listMethodDefMD = new SimpleLazyList<RawMethodRow>(MethodTable.numRows,
+            rid2 => TryReadMethodRow(rid2, out var row) ? row : null);
+        listTypeDefMD = new SimpleLazyList<RawTypeDefRow>(TypeDefTable.numRows,
+            rid2 => TryReadTypeDefRow(rid2, out var row) ? row : null);
     }
 
     public void InitializeTables()
@@ -207,7 +240,6 @@ public partial class TableStream : StreamBase
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader),
             table.Column2.Unsafe_Read24(ref reader));
-        row.SetMetadataHeader(mHeader);
         return true;
     }
 
@@ -228,15 +260,13 @@ public partial class TableStream : StreamBase
 
         reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawTypeDefRow(
+            rid,
             reader.ReadUInt32(),
             table.Column1.Unsafe_Read24(ref reader),
             table.Column2.Unsafe_Read24(ref reader),
             table.Column3.Unsafe_Read24(ref reader),
             table.Column4.Unsafe_Read24(ref reader),
             table.Column5.Unsafe_Read24(ref reader));
-        row.SetMetadataHeader(mHeader);
-        row.fieldRidList = GetFieldRidList(rid);
-        row.methodRidList = GetMethodRidList(rid);
         return true;
     }
 
@@ -280,7 +310,6 @@ public partial class TableStream : StreamBase
             reader.ReadUInt16(),
             table.Column1.Unsafe_Read24(ref reader),
             table.Column2.Unsafe_Read24(ref reader));
-        row.SetMetadataHeader(mHeader);
         row.paramRidList = GetParamRidList(rid);
         return true;
     }
@@ -322,13 +351,13 @@ public partial class TableStream : StreamBase
 
         reader.Position = (rid - 1) * table.tableInfo.size + table.tableInfo.offset;
         row = new RawMethodRow(
+            rid,
             reader.ReadUInt32(),
             reader.ReadUInt16(),
             reader.ReadUInt16(),
             table.Column3.Unsafe_Read24(ref reader),
             table.Column4.Unsafe_Read24(ref reader),
             table.Column5.Unsafe_Read24(ref reader));
-        row.SetMetadataHeader(mHeader);
         return true;
     }
 
@@ -372,7 +401,6 @@ public partial class TableStream : StreamBase
             reader.ReadUInt16(),
             reader.ReadUInt16(),
             table.Column2.Unsafe_Read24(ref reader));
-        row.SetMetadataHeader(mHeader);
         return true;
     }
 
@@ -418,7 +446,6 @@ public partial class TableStream : StreamBase
             table.Column0.Unsafe_Read24(ref reader),
             table.Column1.Unsafe_Read24(ref reader),
             table.Column2.Unsafe_Read24(ref reader));
-        row.SetMetadataHeader(mHeader);
         return true;
     }
 
@@ -981,7 +1008,6 @@ public partial class TableStream : StreamBase
             table.Column6.Unsafe_Read24(ref reader),
             table.Column7.Unsafe_Read24(ref reader),
             table.Column8.Unsafe_Read24(ref reader));
-        row.SetMetadataHeader(mHeader);
         return true;
     }
 

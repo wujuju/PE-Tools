@@ -34,12 +34,12 @@ public class MetadataHeader
     [ShortAttribute] public short streamLength;
     public List<HeapStream> streams = new List<HeapStream>();
 
-    public TableStream tableStream;
-    public HeapStream StringHeapStream;
-    public HeapStream UsHeapStream;
-    public HeapStream BlobHeapStream;
-    public HeapStream GuidHeapStream;
-    public HeapStream PdbHeapStream;
+    public static TableStream tableStream;
+    public static HeapStream StringHeapStream;
+    public static HeapStream UsHeapStream;
+    public static HeapStream BlobHeapStream;
+    public static HeapStream GuidHeapStream;
+    public static HeapStream PdbHeapStream;
 };
 
 public class HeapStream : StreamBase

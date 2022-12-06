@@ -5,6 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace PE_Tools
@@ -20,8 +21,8 @@ namespace PE_Tools
         private void Form1_Resize(object sender, System.EventArgs e)
         {
             treeView.Size = new Size(200, this.Height - 60);
-            songsDataGridView.Size = new Size(this.Width - 200 - 60, this.Height - 60);
-            scrollableControl.Size = songsDataGridView.Size + new Size(2, 0);
+            tabControl.Size = new Size(this.Width - 200 - 60, this.Height - 60);
+            songsDataGridView.Size = clrTreeView.Size = tabControl.Size - new Size(0, 20);
         }
 
         private TreeView treeView;
@@ -29,9 +30,14 @@ namespace PE_Tools
         private TreeNode classView;
         private PeInfo info;
         private DataGridView songsDataGridView;
+
         private Dictionary<string, MDTable> tablesMaps = new Dictionary<string, MDTable>();
-        private ScrollableControl scrollableControl;
+
+        // private ScrollableControl scrollableControl;
         private TableStream tableStream;
+        private TabControl tabControl;
+        private TabPage[] tabPages = new TabPage[2];
+        private CLRTreeView clrTreeView;
 
         public void Init(PeInfo info)
         {
@@ -48,24 +54,35 @@ namespace PE_Tools
             treeView.Nodes.Add(rootNode);
             Controls.Add(treeView);
 
+            tabControl = new TabControl();
+            tabControl.Location = new System.Drawing.Point(10, 25);
+            tabControl.SelectedIndex = 0;
+            tabControl.Size = new System.Drawing.Size(this.Width - 40, this.Height - 75);
+            tabControl.TabIndex = 0;
+            tabControl.Location = new Point(225, 12);
+            Controls.Add(tabControl);
+
             songsDataGridView = new DataGridView();
             songsDataGridView.ReadOnly = true;
             songsDataGridView.DataSourceChanged += MainForm.windowDataGridChange2;
             songsDataGridView.RowHeadersVisible = false;
             songsDataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            songsDataGridView.AutoSize = true;
-            scrollableControl = new ScrollableControl();
-            scrollableControl.AutoScroll = true;
-            scrollableControl.Location = new Point(225, 12);
-            scrollableControl.Controls.Add(songsDataGridView);
-            Controls.Add(scrollableControl);
+            var tabPage = new TabPage();
+            tabPage.Controls.Add(songsDataGridView);
+            tabPages[0] = tabPage;
+
+            clrTreeView = new CLRTreeView();
+            clrTreeView.Init(info);
+            tabPage = new TabPage();
+            tabPage.Controls.Add(clrTreeView);
+            tabPages[1] = tabPage;
 
             TreeNode tablesNode = new TreeNode();
             tablesNode.Text = "Tables";
             rootNode.Nodes.Add(tablesNode);
 
             metadataHeader = info.clrDirectory.metadataHeader;
-            tableStream = metadataHeader.tableStream;
+            tableStream = MetadataHeader.tableStream;
             foreach (var table in tableStream.tables)
             {
                 if (table.numRows == 0)
@@ -78,11 +95,11 @@ namespace PE_Tools
                 tablesMaps[node.Name] = table;
             }
 
-            AddNode(metadataHeader.StringHeapStream);
-            AddNode(metadataHeader.UsHeapStream);
-            AddNode(metadataHeader.BlobHeapStream);
-            AddNode(metadataHeader.GuidHeapStream);
-            AddNode(metadataHeader.PdbHeapStream);
+            AddNode(MetadataHeader.StringHeapStream);
+            AddNode(MetadataHeader.UsHeapStream);
+            AddNode(MetadataHeader.BlobHeapStream);
+            AddNode(MetadataHeader.GuidHeapStream);
+            AddNode(MetadataHeader.PdbHeapStream);
             tablesNode.Expand();
 
             classView = new TreeNode();
@@ -102,13 +119,13 @@ namespace PE_Tools
                 }
 
                 var typeNode = new TreeNode();
-                typeNode.Text = metadataHeader.StringHeapStream.Read(typeDef.Name);
+                typeNode.Text = MetadataHeader.StringHeapStream.Read(typeDef.Name);
                 typeNode.Name = "Class_" + i;
                 node.Nodes.Add(typeNode);
             }
 
+            classView.Nodes[0].ExpandAll();
             classView.Expand();
-            classView.ExpandAll();
             Form1_Resize(null, null);
         }
 
@@ -133,120 +150,23 @@ namespace PE_Tools
             {
                 if (selectedNode.Parent == rootNode)
                 {
+                    ShowTabPageByIndex(0, selectedNode.Name);
                     ExcuteStream(selectedNode.Name);
                 }
                 else if (selectedNode.Name.StartsWith("Class_"))
                 {
                     var index = Convert.ToUInt32(selectedNode.Name.Substring(6, selectedNode.Name.Length - 6));
-                    ExcuteClass(index);
+                    var typeDef = clrTreeView.ExcuteClass(index, tabControl);
+                    Clipboard.SetText(typeDef.name);
+                    ShowTabPageByIndex(1, typeDef.name);
                 }
                 else
                 {
+                    ShowTabPageByIndex(0, selectedNode.Name);
                     ExcuteTables(selectedNode.Name);
                 }
             }
         }
-
-        unsafe void ExcuteClass(uint index)
-        {
-            var typeDef = tableStream.listTypeDefMD[index];
-            DataTable ReturnTable = new DataTable("");
-            ReturnTable.Columns.Add("RID");
-            ReturnTable.Columns.Add("Name");
-            foreach (var rid in typeDef.methodRidList)
-            {
-                RawMethodRow row = tableStream.ResolveMethod(rid);
-                ReturnTable.Rows.Add(new string[]
-                {
-                    rid.ToString(),
-                    metadataHeader.StringHeapStream.Read(row.Name)
-                });
-                var reader = info.bytes;
-                reader.Position = info.Rva2Fov(row.RVA);
-                byte b = reader.ReadInt8();
-                uint codeSize = 0;
-                uint flags;
-                uint maxStack;
-                uint localVarSigTok;
-                uint headerSize;
-                switch (b & 7)
-                {
-                    case 2:
-                    case 6:
-                        // Tiny header. [7:2] = code size, max stack is 8, no locals or exception handlers
-                        flags = 2;
-                        maxStack = 8;
-                        codeSize = (uint)(b >> 2);
-                        localVarSigTok = 0;
-                        headerSize = 1;
-                        break;
-
-                    case 3:
-                        // Fat header. Can have locals and exception handlers
-                        flags = (ushort)((reader.ReadInt8() << 8) | b);
-                        headerSize = (byte)(flags >> 12);
-                        maxStack = reader.ReadUInt16();
-                        codeSize = reader.ReadUInt32();
-                        localVarSigTok = reader.ReadUInt32();
-                        // The CLR allows the code to start inside the method header. But if it does,
-                        // the CLR doesn't read any exceptions.
-                        reader.Position = reader.Position - 12 + (uint)headerSize * 4U;
-                        if (headerSize < 3)
-                            flags &= 0xFFF7;
-                        headerSize *= 4;
-                        break;
-                    default:
-                        Debug.Assert(false);
-                        break;
-                }
-
-                byte* ip = reader.GetPtr();
-                byte* codeEnd = ip + codeSize;
-                while (ip < codeEnd)
-                {
-                    OpCodeInfo oc = OpCodeInfo.DecodeOpCodeInfo(ip, codeEnd);
-                    int opCodeSize = OpCodeInfo.GetOpCodeSize(ip, oc);
-                    byte* nextIp = ip + opCodeSize;
-                    string param = "   ";
-                    var token = *(uint*)(ip + 1);
-                    if (oc.name.StartsWith("ldstr"))
-                    {
-                        param += PETools.GetHexString(
-                            metadataHeader.UsHeapStream.ReadUTF16String(token & 0x00FFFFFF),
-                            "UNICODE");
-                    }
-
-
-                    switch (oc.id)
-                    {
-                        case OpcodeEnum.CALLVIRT:
-                        case OpcodeEnum.CALL:
-                            switch (MDToken.ToTable(token))
-                            {
-                                case Table.MemberRef:
-                                    param += GetString(index, MDToken.ToRID(token), null, ColumnSize.MemberRef);
-                                    break;
-                            }
-
-                            break;
-                        case OpcodeEnum.LDFLD:
-                        case OpcodeEnum.NEWARR:
-                            param += tableStream.ResolveToken(token);
-                            break;
-                    }
-
-                    ReturnTable.Rows.Add(new string[]
-                    {
-                        "",
-                        oc.name + "" + param
-                    });
-                    ip = nextIp;
-                }
-            }
-
-            songsDataGridView.DataSource = ReturnTable;
-        }
-
 
         void ExcuteStream(string name)
         {
@@ -262,19 +182,19 @@ namespace PE_Tools
             switch (name)
             {
                 case "#Strings":
-                    list = metadataHeader.StringHeapStream.list;
+                    list = MetadataHeader.StringHeapStream.list;
                     value = "ASCII";
                     break;
                 case "#US":
-                    list = metadataHeader.UsHeapStream.list;
+                    list = MetadataHeader.UsHeapStream.list;
                     value = "UNICODE";
                     break;
                 case "#Blob":
-                    list = metadataHeader.BlobHeapStream.list;
+                    list = MetadataHeader.BlobHeapStream.list;
                     value = "BYTE";
                     break;
                 case "#GUID":
-                    list = metadataHeader.GuidHeapStream.list;
+                    list = MetadataHeader.GuidHeapStream.list;
                     break;
             }
 
@@ -324,11 +244,11 @@ namespace PE_Tools
                     }
                     else if (column.size == 2)
                     {
-                        row[index] = GetString(i + 1, bytesArray.ReadUInt16(), column);
+                        row[index] = PETools.GetString(i + 1, bytesArray.ReadUInt16(), column);
                     }
                     else if (column.size == 4)
                     {
-                        row[index] = GetString(i + 1, bytesArray.ReadUInt32(), column);
+                        row[index] = PETools.GetString(i + 1, bytesArray.ReadUInt32(), column);
                     }
                     else if (column.size == 8)
                     {
@@ -346,83 +266,16 @@ namespace PE_Tools
             songsDataGridView.DataSource = ReturnTable;
         }
 
-
-        string GetString(uint rid, uint offset, ColumnInfo column, ColumnSize type = ColumnSize.None)
+        void ShowTabPageByIndex(int index, string text)
         {
-            if (column != null)
-                type = column.columnSize;
-            string str = "";
-            switch (type)
+            for (int i = tabPages.Length - 1; i >= 0; i--)
             {
-                case ColumnSize.TypeFlags:
-                    return ((TypeAttributes)offset).ToString();
-                case ColumnSize.FieldFlags:
-                    return ((FieldAttributes)offset).ToString();
-                case ColumnSize.MethodFlags:
-                    return ((MethodAttributes)offset).ToString();
-                case ColumnSize.Strings:
-                    return metadataHeader.StringHeapStream.Read(offset);
-                case ColumnSize.UInt16:
-                case ColumnSize.UInt32:
-                case ColumnSize.GUID:
-                    return offset.ToString();
-                case ColumnSize.Int16:
-                case ColumnSize.Blob:
-                    return offset.ToString("X");
-                case ColumnSize.TypeDefOrRef:
-                    var row = tableStream.ResolveTypeDefOrRef(offset);
-                    if (row is RawTypeDefRow)
-                    {
-                        var typeDef = row as RawTypeDefRow;
-                        return typeDef.name;
-                    }
-
-                    if (row is RawTypeRefRow)
-                    {
-                        var typeRef = row as RawTypeRefRow;
-                        return typeRef.name;
-                    }
-
-                    return "";
-                case ColumnSize.ResolutionScope:
-                    return tableStream.ResolveResolutionScope(offset);
-                case ColumnSize.MemberRefParent:
-                    return tableStream.ResolveMemberRefParent(offset);
-                case ColumnSize.MemberRef:
-                    var methodRef = tableStream.ResolveMemberRef(offset);
-                    if (methodRef != null)
-                        return tableStream.ResolveMemberRefParent(methodRef.Class) + "::" + methodRef.name;
-                    break;
-                case ColumnSize.FieldList:
-                    var fieldRidList = tableStream.ResolveTypeDef(rid).fieldRidList;
-                    if (fieldRidList.Count == 0)
-                        return "";
-                    for (int i = 0; i < fieldRidList.Count; i++)
-                    {
-                        str += tableStream.ResolveField(fieldRidList[i]).name +
-                               (i < fieldRidList.Count - 1 ? " | " : "");
-                    }
-
-                    return str;
-                case ColumnSize.MethodList:
-                    var methodRidList = tableStream.ResolveTypeDef(rid).methodRidList;
-                    if (methodRidList.Count == 0)
-                        return "";
-                    for (int i = 0; i < methodRidList.Count; i++)
-                    {
-                        str += tableStream.ResolveMethod(methodRidList[i]).name +
-                               (i < methodRidList.Count - 1 ? " | " : "");
-                    }
-
-                    return str;
-                case ColumnSize.Method:
-                    var method = tableStream.ResolveMethod(offset);
-                    if (method != null)
-                        return method.name;
-                    break;
+                tabControl.Controls.Remove(tabPages[i]);
             }
 
-            return offset.ToString();
+            var control = tabPages[index];
+            tabControl.Controls.Add(control);
+            control.Text = text;
         }
     }
 }

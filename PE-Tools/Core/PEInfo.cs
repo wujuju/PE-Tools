@@ -374,7 +374,7 @@ public unsafe class PeInfo
         {
             var startPos = Rva2Fov(address) + (uint)stream.offset;
             mByte.Position = startPos;
-            stream.reader = new BytesArray(mByte, mByte.Position, (uint)stream.streamSize);
+            stream.reader = new BytesArray(mByte, 0, (uint)stream.streamSize);
             switch (stream.name)
             {
                 case "#~":
@@ -410,29 +410,29 @@ public unsafe class PeInfo
                         table.UpdateSize(HasBigStrings, HasBigGUID, HasBigBlob, sizes, ref offset);
                     }
 
-                    tableStream.reader = new BytesArray(mByte, mByte.Position, (uint)stream.streamSize);
+                    tableStream.reader = new BytesArray(mByte, 0, (uint)stream.streamSize);
                     tableStream.tablesPos = (uint)(mByte.Position - startPos);
                     tableStream.tables = mdTables;
-                    metadataHeader.tableStream = tableStream;
+                    MetadataHeader.tableStream = tableStream;
                     break;
                 case "#Strings":
-                    metadataHeader.StringHeapStream = stream;
+                    MetadataHeader.StringHeapStream = stream;
                     ReadStringList(stream);
                     break;
                 case "#US":
-                    metadataHeader.UsHeapStream = stream;
+                    MetadataHeader.UsHeapStream = stream;
                     ReadCompressedStringList(stream);
                     break;
                 case "#Blob":
-                    metadataHeader.BlobHeapStream = stream;
+                    MetadataHeader.BlobHeapStream = stream;
                     ReadCompressedStringList(stream);
                     break;
                 case "#GUID":
-                    metadataHeader.GuidHeapStream = stream;
+                    MetadataHeader.GuidHeapStream = stream;
                     ReadGuid(stream);
                     break;
                 case "#Pdb":
-                    metadataHeader.PdbHeapStream = stream;
+                    MetadataHeader.PdbHeapStream = stream;
                     // ReadCompressedStringList(stream);
                     break;
                 case "#JTD":
@@ -440,8 +440,8 @@ public unsafe class PeInfo
             }
         }
 
-        metadataHeader.tableStream.InitializeTables();
-        metadataHeader.tableStream.Initialize(metadataHeader);
+        MetadataHeader.tableStream.InitializeTables();
+        MetadataHeader.tableStream.Initialize();
     }
 
     void ReadGuid(HeapStream stream)

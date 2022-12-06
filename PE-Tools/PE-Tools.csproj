@@ -51,14 +51,16 @@
     <Compile Include="Core\Base\Attribute.cs" />
     <Compile Include="Core\Base\BytesArray.cs" />
     <Compile Include="Core\Base\CodedToken.cs" />
+    <Compile Include="Core\Base\ElementType.cs" />
     <Compile Include="Core\Base\FieldAttributes.cs" />
-    <Compile Include="Core\Base\IRowReaders.cs" />
     <Compile Include="Core\Base\MDStreamFlags.cs" />
     <Compile Include="Core\Base\MDToken.cs" />
     <Compile Include="Core\Base\MethodAttributes.cs" />
     <Compile Include="Core\Base\MethodImplAttributes.cs" />
     <Compile Include="Core\Base\OpCode\CodeEnum.cs" />
     <Compile Include="Core\Base\OpCode\OpCodeInfo.cs" />
+    <Compile Include="Core\Base\OpCode\OperandType.cs" />
+    <Compile Include="Core\Base\OpCode\TypeAttributes.cs" />
     <Compile Include="Core\Base\PEInfoBase.cs" />
     <Compile Include="Core\Base\PEInfoType.cs" />
     <Compile Include="Core\Base\RawTableRows.cs" />
@@ -67,11 +69,11 @@
     <Compile Include="Core\Base\StreamBase.cs" />
     <Compile Include="Core\Base\TableParse.cs" />
     <Compile Include="Core\Base\TableStream.cs" />
-    <Compile Include="Core\Base\TypeAttributes.cs" />
     <Compile Include="Core\Metadata.cs" />
     <Compile Include="Core\PEDirectory.cs" />
     <Compile Include="Core\PEInfo.cs" />
     <Compile Include="Core\PETools.cs" />
+    <Compile Include="Form\CLRTreeView.cs" />
     <Compile Include="Form\ExportForm.cs">
       <SubType>Form</SubType>
     </Compile>

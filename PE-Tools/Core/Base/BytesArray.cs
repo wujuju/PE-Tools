@@ -40,7 +40,7 @@ public class BytesArray
     public BytesArray(BytesArray bytes, int startOffset, int length)
     {
         this.mbytes = bytes.mbytes;
-        this.startOffset = bytes.startOffset + startOffset;
+        this.startOffset = bytes.RealPostion + startOffset;
         Debug.Assert(startOffset + length <= bytes.endOffset);
         this.endOffset = startOffset + length;
     }
@@ -48,7 +48,7 @@ public class BytesArray
     public BytesArray(BytesArray bytes, uint startOffset, uint length)
     {
         this.mbytes = bytes.mbytes;
-        this.startOffset = bytes.startOffset + (int)startOffset;
+        this.startOffset = bytes.RealPostion + (int)startOffset;
         Debug.Assert(startOffset + length <= bytes.endOffset);
         this.endOffset = (int)startOffset + (int)length;
     }
@@ -81,6 +81,20 @@ public class BytesArray
         return value;
     }
 
+    public sbyte ReadSInt8()
+    {
+        var value = (sbyte)mbytes[RealPostion];
+        position += 1;
+        return value;
+    }
+
+    public float ReadSingle()
+    {
+        var value = BitConverter.ToSingle(mbytes, RealPostion);
+        position += 4;
+        return value;
+    }
+    
     public short ReadInt16()
     {
         var value = BitConverter.ToInt16(mbytes, RealPostion);
@@ -171,6 +185,31 @@ public class BytesArray
         }
     }
 
+    public int ReadCompressedUint32(out int lengthSize)
+    {
+        int firstByte = ReadInt8();
+        if (firstByte < 128)
+        {
+            lengthSize = 1;
+            return firstByte;
+        }
+        else if (firstByte < 192)
+        {
+            lengthSize = 2;
+            return ((firstByte & 0x3f) << 8) | ReadInt8();
+        }
+        else if (firstByte < 224)
+        {
+            lengthSize = 4;
+            return ((firstByte & 0x1f) << 24) | (((int)ReadInt8()) << 16) |
+                   ((int)ReadInt8() << 8) | (int)ReadInt8();
+        }
+        else
+        {
+            throw new Exception("bad metadata data. ReadEncodeLength fail");
+        }
+    }
+    
     public unsafe byte* GetPtr()
     {
         fixed (byte* ptr = mbytes)

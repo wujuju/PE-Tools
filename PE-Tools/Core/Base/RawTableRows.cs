@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// Raw contents of an uncompressed Module table row
@@ -51,23 +52,25 @@ public class RawTypeRefRow
         this.ResolutionScope = ResolutionScope;
         this.Name = Name;
         this.Namespace = Namespace;
+        SetMetadataHeader();
     }
 
     public string name;
     public string nameSpace;
-    public void SetMetadataHeader(MetadataHeader header)
+
+    void SetMetadataHeader()
     {
-        name = header.StringHeapStream.Read(Name);
-        nameSpace = header.StringHeapStream.Read(Namespace);
+        name = MetadataHeader.StringHeapStream.Read(Name);
+        nameSpace = MetadataHeader.StringHeapStream.Read(Namespace);
     }
 
-    public string ToString()
+    public override string ToString()
     {
         if (nameSpace.Length == 0)
             return name;
-        return String.Format("[{1}]{0}", name, nameSpace);
+        return String.Format("[{1}][{0}]", name, nameSpace);
     }
-    
+
     /// <summary>
     /// Gets a column
     /// </summary>
@@ -88,33 +91,53 @@ public class RawTypeRefRow
 /// </summary>
 public class RawTypeDefRow
 {
+    public readonly uint Rid;
     public readonly uint Flags;
     public readonly uint Name;
     public readonly uint Namespace;
     public readonly uint Extends;
     public readonly uint FieldList;
     public readonly uint MethodList;
-    public RidList fieldRidList;
-    public RidList methodRidList;
+    public List<RawFieldRow> fieldRidList = new List<RawFieldRow>();
+    public List<RawMethodRow> methodRidList = new List<RawMethodRow>();
 
-    public RawTypeDefRow(uint Flags, uint Name, uint Namespace, uint Extends, uint FieldList, uint MethodList)
+    public RawTypeDefRow(uint Rid, uint Flags, uint Name, uint Namespace, uint Extends, uint FieldList, uint MethodList)
     {
+        this.Rid = Rid;
         this.Flags = Flags;
         this.Name = Name;
         this.Namespace = Namespace;
         this.Extends = Extends;
         this.FieldList = FieldList;
         this.MethodList = MethodList;
+        SetMetadataHeader();
     }
 
     public string name;
     public string nameSpace;
-    public void SetMetadataHeader(MetadataHeader header)
+
+    void SetMetadataHeader()
     {
-        name = header.StringHeapStream.Read(Name);
-        nameSpace = header.StringHeapStream.Read(Namespace);
+        var tmpFieldRidList = MetadataHeader.tableStream.GetFieldRidList(Rid);
+        var tmpMethodRidList = MetadataHeader.tableStream.GetMethodRidList(Rid);
+        name = MetadataHeader.StringHeapStream.Read(Name);
+        nameSpace = MetadataHeader.StringHeapStream.Read(Namespace);
+
+        for (int i = 0; i < tmpFieldRidList.Count; i++)
+        {
+            var field = MetadataHeader.tableStream.ResolveField(tmpFieldRidList[i]);
+            field.typeDefRow = this;
+            fieldRidList.Add(field);
+        }
+
+        for (int i = 0; i < tmpMethodRidList.Count; i++)
+        {
+            var method = MetadataHeader.tableStream.ResolveMethod(tmpMethodRidList[i]);
+            method.typeDefRow = this;
+            methodRidList.Add(method);
+        }
     }
-    
+
     /// <summary>
     /// Gets a column
     /// </summary>
@@ -164,22 +187,26 @@ public class RawFieldRow
     public readonly uint Name;
     public readonly uint Signature;
     public RidList paramRidList;
+
     public RawFieldRow(ushort Flags, uint Name, uint Signature)
     {
         this.Flags = Flags;
         this.Name = Name;
         this.Signature = Signature;
-    }
-    
-    public string name;
-    public void SetMetadataHeader(MetadataHeader header)
-    {
-        name = header.StringHeapStream.Read(Name);
+        SetMetadataHeader();
     }
 
-    public string ToString()
+    public string name;
+    public RawTypeDefRow typeDefRow;
+
+    void SetMetadataHeader()
     {
-        return name;
+        name = MetadataHeader.StringHeapStream.Read(Name);
+    }
+
+    public override string ToString()
+    {
+        return string.Format("[{0}]{1}", typeDefRow.name, name);
     }
 
     /// <summary>
@@ -224,6 +251,7 @@ public class RawMethodPtrRow
 /// </summary>
 public class RawMethodRow
 {
+    public readonly uint Rid;
     public readonly uint RVA;
     public readonly ushort ImplFlags;
     public readonly ushort Flags;
@@ -231,26 +259,38 @@ public class RawMethodRow
     public readonly uint Signature;
     public readonly uint ParamList;
 
-    public RawMethodRow(uint RVA, ushort ImplFlags, ushort Flags, uint Name, uint Signature, uint ParamList)
+    public RawMethodRow(uint Rid, uint RVA, ushort ImplFlags, ushort Flags, uint Name, uint Signature, uint ParamList)
     {
+        this.Rid = Rid;
         this.RVA = RVA;
         this.ImplFlags = ImplFlags;
         this.Flags = Flags;
         this.Name = Name;
         this.Signature = Signature;
         this.ParamList = ParamList;
+        SetMetadataHeader();
     }
 
     public string name;
-    public void SetMetadataHeader(MetadataHeader header)
+    public RawTypeDefRow typeDefRow;
+
+    void SetMetadataHeader()
     {
-        name = header.StringHeapStream.Read(Name);
+        name = MetadataHeader.StringHeapStream.Read(Name);
+        var tmpParamRidList = MetadataHeader.tableStream.GetParamRidList(Rid);
+
+        for (int i = 0; i < tmpParamRidList.Count; i++)
+        {
+            var param = MetadataHeader.tableStream.ResolveParam(tmpParamRidList[i]);
+            param.methodRow = this;
+        }
     }
 
-    public string ToString()
+    public override string ToString()
     {
-        return name;
+        return string.Format("[{0}]{1}", typeDefRow.name, name);
     }
+
     /// <summary>
     /// Gets a column
     /// </summary>
@@ -305,19 +345,23 @@ public class RawParamRow
         this.Flags = Flags;
         this.Sequence = Sequence;
         this.Name = Name;
+        SetMetadataHeader();
     }
 
-    
+
     public string name;
-    public void SetMetadataHeader(MetadataHeader header)
+    public RawMethodRow methodRow;
+
+    void SetMetadataHeader()
     {
-        name = header.StringHeapStream.Read(Name);
+        name = MetadataHeader.StringHeapStream.Read(Name);
     }
 
-    public string ToString()
+    public override string ToString()
     {
-        return name;
+        return methodRow.ToString() + name;
     }
+
     /// <summary>
     /// Gets a column
     /// </summary>
@@ -375,12 +419,22 @@ public class RawMemberRefRow
         this.Class = Class;
         this.Name = Name;
         this.Signature = Signature;
+        SetMetadataHeader();
     }
-    
+
     public string name;
-    public void SetMetadataHeader(MetadataHeader header)
+
+    void SetMetadataHeader()
     {
-        name = header.StringHeapStream.Read(Name);
+        name = MetadataHeader.StringHeapStream.Read(Name);
+    }
+
+    public override string ToString()
+    {
+        var classObj = MetadataHeader.tableStream.ResolveMemberRefParent(Class);
+        if (classObj != null)
+            return string.Format("[{0}]{1}", classObj, name);
+        return name;
     }
 
     /// <summary>
@@ -857,6 +911,29 @@ public class RawTypeSpecRow
     public readonly uint Signature;
 
     public RawTypeSpecRow(uint Signature) => this.Signature = Signature;
+    private BytesArray mReader;
+
+    public BytesArray Reader
+    {
+        get
+        {
+            if (mReader == null)
+            {
+                var stream = MetadataHeader.BlobHeapStream;
+                stream.reader.Position = Signature;
+                var length = stream.ReadCompressedUint32(out var lengthSize);
+                mReader = new BytesArray(stream.reader, 0, length);
+            }
+
+            return mReader;
+        }
+    }
+
+    public override string ToString()
+    {
+        MetadataHeader.tableStream.ReadTypeSignature(Reader);
+        return String.Format("RawTypeSpecRow");
+    }
 
     /// <summary>
     /// Gets a column
@@ -1113,15 +1190,17 @@ public class RawAssemblyRefRow
         this.Name = Name;
         this.Locale = Locale;
         this.HashValue = HashValue;
-    }
-    
-    public string name;
-    public void SetMetadataHeader(MetadataHeader header)
-    {
-        name = header.StringHeapStream.Read(Name);
+        SetMetadataHeader();
     }
 
-    public string ToString()
+    public string name;
+
+    void SetMetadataHeader()
+    {
+        name = MetadataHeader.StringHeapStream.Read(Name);
+    }
+
+    public override string ToString()
     {
         return name;
     }
@@ -1397,6 +1476,17 @@ public class RawMethodSpecRow
     {
         this.Method = Method;
         this.Instantiation = Instantiation;
+        SetMetadataHeader();
+    }
+
+    void SetMetadataHeader()
+    {
+        // name = MetadataHeader.StringHeapStream.Read(Name);
+    }
+
+    public override string ToString()
+    {
+        return MetadataHeader.tableStream.ResolveMethodDefOrRef(Method).ToString();
     }
 
     /// <summary>
