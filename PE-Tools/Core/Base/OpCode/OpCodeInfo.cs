@@ -16,7 +16,6 @@ public unsafe class OpCodeInfo
 
     public byte* ip;
     public uint Offset;
-    public uint Token;
     public int OpCodeSize;
 
     public OpCodeInfo(OpcodeEnum id, string name, OperandType operandType,
@@ -42,7 +41,7 @@ public unsafe class OpCodeInfo
 
     public static unsafe OpCodeInfo DecodeOpCodeInfo(byte** ip, byte* end)
     {
-        if (ip >= end)
+        if (*ip >= end)
         {
             return null;
         }

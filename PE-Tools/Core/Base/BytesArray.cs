@@ -16,13 +16,6 @@ public class BytesArray
         this.endOffset = bytes.Length;
     }
 
-    // public BytesArray(byte[] bytes, int length, BytesArray bytesArray)
-    // {
-    //     this.mbytes = bytes;
-    //     this.startOffset = startOffset;
-    //     this.endOffset = startOffset + length;
-    // }
-
     public BytesArray(byte[] bytes, int startOffset, int length)
     {
         this.mbytes = bytes;

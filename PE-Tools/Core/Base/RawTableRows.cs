@@ -273,6 +273,7 @@ public class RawMethodRow
 
     public string name;
     public RawTypeDefRow typeDefRow;
+    public List<RawParamRow> paramRows = new List<RawParamRow>();
 
     void SetMetadataHeader()
     {
@@ -283,6 +284,7 @@ public class RawMethodRow
         {
             var param = MetadataHeader.tableStream.ResolveParam(tmpParamRidList[i]);
             param.methodRow = this;
+            paramRows.Add(param);
         }
     }
 
@@ -359,7 +361,7 @@ public class RawParamRow
 
     public override string ToString()
     {
-        return methodRow.ToString() + name;
+        return string.Format("'{0}'", name);
     }
 
     /// <summary>

@@ -12,6 +12,7 @@ public class CLRTreeView : TreeView
     private TableStream tableStream;
     private StringBuilder stringBuilder = new StringBuilder();
     private BytesArray reader;
+    private RawMethodRow currMethodRow;
 
     public void Init(PeInfo info)
     {
@@ -20,7 +21,7 @@ public class CLRTreeView : TreeView
         tableStream = MetadataHeader.tableStream;
     }
 
-    public unsafe RawTypeDefRow ExcuteClass(uint index,TabControl tabControl)
+    public unsafe RawTypeDefRow ExcuteClass(uint index, TabControl tabControl)
     {
         this.Nodes.Clear();
         var typeDef = tableStream.listTypeDefMD[index];
@@ -28,6 +29,7 @@ public class CLRTreeView : TreeView
         foreach (RawMethodRow row in typeDef.methodRidList)
         {
             var rid = row.Rid;
+            this.currMethodRow = row;
             stringBuilder.Clear();
             stringBuilder.Append(rid.ToString());
             stringBuilder.Append(" : ");
@@ -82,7 +84,6 @@ public class CLRTreeView : TreeView
                 byte* nextIp = ip + opCodeSize;
                 oc.Offset = (uint)(ip - startIp);
                 oc.ip = ip + 1;
-                oc.Token = *(uint*)(ip + 1);
                 oc.OpCodeSize = opCodeSize;
                 string param = ReadOperand(oc) + "";
                 stringBuilder.Clear();
@@ -96,6 +97,7 @@ public class CLRTreeView : TreeView
 
             clrNode.ExpandAll();
         }
+
         return typeDef;
     }
 
@@ -124,6 +126,17 @@ public class CLRTreeView : TreeView
             _ => throw new InvalidOperationException("Invalid OpCode.OperandType"),
         };
 
+    protected virtual string ReadInlineR(OpCodeInfo instr) => "ReadInlineR没实现";
+    protected virtual string ReadInlineSig(OpCodeInfo instr)
+    {
+        MetadataHeader.tableStream.ReadTypeSignature(instr.ReadUInt32());
+        return "ReadInlineSig没实现";
+    }
+
+    protected virtual string ReadInlineVar(OpCodeInfo instr) => "ReadInlineVar没实现";
+    protected virtual string ReadInlineSwitch(OpCodeInfo instr) => "ReadInlineSwitch没实现";
+    protected virtual string ReadInlinePhi(OpCodeInfo instr) => "<*****ReadInlinePhi*****>";
+    
     protected virtual object ReadShortInlineI(OpCodeInfo instr)
     {
         if (instr.id == OpcodeEnum.LDC_I4_S)
@@ -149,16 +162,20 @@ public class CLRTreeView : TreeView
         return ReadShortInlineVarLocal(instr);
     }
 
-    protected virtual string ReadShortInlineVarArg(OpCodeInfo instr) => "<*****ReadShortInlineVarArg*****>";
-    //GetParameter(reader.ReadByte());
+    protected virtual string ReadShortInlineVarArg(OpCodeInfo instr)
+    {
+        var index = instr.ReadInt8();
+        if (index >= currMethodRow.paramRows.Count)
+            return "Null";
+        var param = currMethodRow.paramRows[index];
+        return param.ToString();
+    }
 
-    /// <summary>
-    /// Reads a <see cref="OperandType.ShortInlineVar"/> (a local) operand
-    /// </summary>
-    /// <param name="instr">The current instruction</param>
-    /// <returns>The operand</returns>
-    protected virtual string ReadShortInlineVarLocal(OpCodeInfo instr) => "<*****ReadShortInlineVarLocal*****>";
-    // GetLocal(reader.ReadByte());
+    protected virtual string ReadShortInlineVarLocal(OpCodeInfo instr)
+    {
+        var index = instr.ReadInt8();
+        return "V_" + index;
+    }
 
     protected static bool IsArgOperandInstruction(OpCodeInfo instr)
     {
@@ -176,29 +193,21 @@ public class CLRTreeView : TreeView
         }
     }
 
-    protected virtual string ReadInlineR(OpCodeInfo instr) => "ReadInlineR没实现";
-    protected virtual string ReadInlineSig(OpCodeInfo instr) => "ReadInlineSig没实现";
-    protected virtual string ReadInlineVar(OpCodeInfo instr) => "ReadInlineVar没实现";
-    protected virtual string ReadInlineSwitch(OpCodeInfo instr) => "ReadInlineSwitch没实现";
-
     protected virtual string ReadInlineNone(OpCodeInfo instr) => "";
 
-    protected virtual string ReadInlinePhi(OpCodeInfo instr) => "<*****ReadInlinePhi*****>";
-
-
     protected virtual string ReadInlineField(OpCodeInfo instr) =>
-        MetadataHeader.tableStream.ResolveToken(instr.Token);
+        MetadataHeader.tableStream.ResolveToken(instr.ReadUInt32());
 
-    protected virtual string ReadInlineMethod(OpCodeInfo instr) => MetadataHeader.tableStream.ResolveToken(instr.Token);
+    protected virtual string ReadInlineMethod(OpCodeInfo instr) => MetadataHeader.tableStream.ResolveToken(instr.ReadUInt32());
 
     protected virtual string ReadInlineString(OpCodeInfo instr) =>
-        "\"" + PETools.GetHexString(MetadataHeader.UsHeapStream.ReadUTF16String(instr.Token & 0x00FFFFFF), "UNICODE") +
+        "\"" + PETools.GetHexString(MetadataHeader.UsHeapStream.ReadUTF16String(instr.ReadUInt32() & 0x00FFFFFF), "UNICODE") +
         "\"";
 
 
-    protected virtual string ReadInlineTok(OpCodeInfo instr) => MetadataHeader.tableStream.ResolveToken(instr.Token);
+    protected virtual string ReadInlineTok(OpCodeInfo instr) => MetadataHeader.tableStream.ResolveToken(instr.ReadUInt32());
 
-    protected virtual string ReadInlineType(OpCodeInfo instr) => MetadataHeader.tableStream.ResolveToken(instr.Token);
+    protected virtual string ReadInlineType(OpCodeInfo instr) => MetadataHeader.tableStream.ResolveToken(instr.ReadUInt32());
 
 
     string ToIlPtrBase(uint value)
