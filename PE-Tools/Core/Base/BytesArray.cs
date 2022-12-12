@@ -20,8 +20,8 @@ public class BytesArray
     {
         this.mbytes = bytes.mbytes;
         this.startOffset = bytes.RealPostion + (int)startOffset;
-        Debug.Assert(startOffset + length <= bytes.endOffset);
-        this.endOffset = (int)startOffset + (int)length;
+        this.endOffset = (int)this.startOffset + (int)length;
+        Debug.Assert(this.startOffset + length <= bytes.endOffset);
     }
 
     public byte[] Data()

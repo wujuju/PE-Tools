@@ -466,9 +466,9 @@ public unsafe class PeInfo
         var offset = 0;
         while (true)
         {
-            var str = stream.TryReadBytesUntil();
             if (!stream.IsValid())
                 break;
+            var str = stream.TryReadBytesUntil();
             HeapStreamString value = new HeapStreamString();
             value.length = str.Length;
             value.offset = offset;
@@ -501,7 +501,7 @@ public unsafe class PeInfo
     {
         for (int i = 0; i != _SectionTable.Section.Count; i++) //循环节表
         {
-            SectionData Sect = (SectionData)_SectionTable.Section[i];
+            SectionData Sect = _SectionTable.Section[i];
 
             long StarRva = PETools.GetUint(Sect.VirtualAddress);
             long EndRva = PETools.GetUint(Sect.SizeOfRawData);

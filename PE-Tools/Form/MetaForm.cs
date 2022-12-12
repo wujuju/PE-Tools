@@ -179,7 +179,7 @@ namespace PE_Tools
             {
                 case "#Strings":
                     list = MetadataHeader.StringHeapStream.list;
-                    value = "ASCII";
+                    value = "UTF8";
                     break;
                 case "#US":
                     list = MetadataHeader.UsHeapStream.list;

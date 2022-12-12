@@ -99,8 +99,7 @@ namespace PE_Tools
         void OpenPE(string path)
         {
             string cacheFile = Path.Combine(Environment.CurrentDirectory, "cache.txt");
-            if (!File.Exists(cacheFile))
-                File.WriteAllText(cacheFile, path);
+            File.WriteAllText(cacheFile, path);
             PeInfo tmpInfo;
             try
             {

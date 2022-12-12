@@ -34,6 +34,7 @@ public class PETools
     public static string GetHexString(byte[] Data, string Type)
     {
         if (Type.Trim().ToUpper() == "ASCII") return Encoding.ASCII.GetString(Data);
+        if (Type.Trim().ToUpper() == "UTF8") return Encoding.UTF8.GetString(Data);
         if (Type.Trim().ToUpper() == "DEFAULT") return Encoding.Default.GetString(Data);
         if (Type.Trim().ToUpper() == "UNICODE") return Encoding.Unicode.GetString(Data);
         if (Type.Trim().ToUpper() == "BYTE")
@@ -64,7 +65,7 @@ public class PETools
         Debug.Assert(false);
         return 0;
     }
-    
+
     public static long GetLong(byte[] Data)
     {
         if (Data.Length == 2)
@@ -153,5 +154,4 @@ public class PETools
 
         return offset.ToString();
     }
-    
 }
