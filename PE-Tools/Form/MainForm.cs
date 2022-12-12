@@ -55,7 +55,7 @@ namespace PE_Tools
             this.AllowDrop = true;
             this.DragDrop += Form1_DragDrop;
             this.DragEnter += Form1_DragEnter;
-            OpenPE(@"C:\fanmeta-tklua\Assets\Source\Client\AppClient~\bin\Debug\AppClient.dll");
+            // OpenPE(@"C:\fanmeta-tklua\Assets\Source\Client\AppClient~\bin\Debug\AppClient.dll");
             // OpenPE(@"C:\hybridclr_trial\Assets\StreamingAssets\Assembly-CSharp.dll.bytes");
         }
 
@@ -96,15 +96,15 @@ namespace PE_Tools
         void OpenPE(string path)
         {
             PeInfo tmpInfo;
-            // try
+            try
             {
                 tmpInfo = new PeInfo(path);
             }
-            // catch (Exception e)
-            // {
-            //     MessageBox.Show("解析错误:" + e.ToString());
-            //     return;
-            // }
+            catch (Exception e)
+            {
+                MessageBox.Show("解析错误:" + e.ToString());
+                return;
+            }
 
             info = tmpInfo;
             while (tabControl1.Controls.Count > 0)
@@ -127,8 +127,8 @@ namespace PE_Tools
             }
 
             tabControl1.SelectedIndex = -1;
-            // tabControl1.SelectedIndex = 0;
-            tabControl1.SelectedIndex = 4;
+            tabControl1.SelectedIndex = 0;
+            // tabControl1.SelectedIndex = 4;
         }
 
         void CreateDosHeaderPanel(TabPage tabPage1)
@@ -203,7 +203,7 @@ namespace PE_Tools
                 Name,
                 Data.Length.ToString(),
                 PETools.GetHexString(Data),
-                PETools.GetUint(Data).ToString(),
+                PETools.GetLong(Data).ToString(),
                 PETools.GetHexString(Data, "ASCII"),
                 Describe
             });
@@ -232,7 +232,7 @@ namespace PE_Tools
 
             tabPage1.Controls.Add(songsDataGridView);
             songsDataGridView.DataSource = TableOptionalDirAttrib();
-            OnDirBtnClick(tabPage1.Controls.Find("CLR",false)[0], null);
+            // OnDirBtnClick(tabPage1.Controls.Find("CLR",false)[0], null);
         }
 
         public DataTable TableOptionalDirAttrib()

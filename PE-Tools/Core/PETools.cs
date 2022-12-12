@@ -63,6 +63,17 @@ public class PETools
         Debug.Assert(false);
         return 0;
     }
+    
+    public static long GetLong(byte[] Data)
+    {
+        if (Data.Length == 2)
+            return BitConverter.ToUInt16(Data, 0);
+        if (Data.Length == 4)
+            return BitConverter.ToUInt32(Data, 0);
+        if (Data.Length == 4)
+            return BitConverter.ToInt64(Data, 0);
+        return 0;
+    }
 
     public static string Convert16String(int value)
     {

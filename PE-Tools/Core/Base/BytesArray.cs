@@ -16,28 +16,6 @@ public class BytesArray
         this.endOffset = bytes.Length;
     }
 
-    public BytesArray(byte[] bytes, int startOffset, int length)
-    {
-        this.mbytes = bytes;
-        this.startOffset = startOffset;
-        this.endOffset = startOffset + length;
-    }
-
-    public BytesArray(byte[] bytes, uint startOffset, uint length)
-    {
-        this.mbytes = bytes;
-        this.startOffset = (int)startOffset;
-        this.endOffset = (int)(startOffset + length);
-    }
-
-    public BytesArray(BytesArray bytes, int startOffset, int length)
-    {
-        this.mbytes = bytes.mbytes;
-        this.startOffset = bytes.RealPostion + startOffset;
-        Debug.Assert(startOffset + length <= bytes.endOffset);
-        this.endOffset = startOffset + length;
-    }
-
     public BytesArray(BytesArray bytes, uint startOffset, uint length)
     {
         this.mbytes = bytes.mbytes;
@@ -87,7 +65,7 @@ public class BytesArray
         position += 4;
         return value;
     }
-    
+
     public short ReadInt16()
     {
         var value = BitConverter.ToInt16(mbytes, RealPostion);
@@ -202,7 +180,7 @@ public class BytesArray
             throw new Exception("bad metadata data. ReadEncodeLength fail");
         }
     }
-    
+
     public unsafe byte* GetPtr()
     {
         fixed (byte* ptr = mbytes)

@@ -924,7 +924,7 @@ public class RawTypeSpecRow
                 var stream = MetadataHeader.BlobHeapStream;
                 stream.reader.Position = Signature;
                 var length = stream.ReadCompressedUint32(out var lengthSize);
-                mReader = new BytesArray(stream.reader, 0, length);
+                mReader = new BytesArray(stream.reader, 0, (uint)length);
             }
 
             return mReader;
@@ -934,7 +934,7 @@ public class RawTypeSpecRow
     public override string ToString()
     {
         MetadataHeader.tableStream.ReadTypeSignature(Reader);
-        return String.Format("RawTypeSpecRow");
+        return String.Format("未实现RawTypeSpecRow");
     }
 
     /// <summary>

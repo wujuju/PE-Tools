@@ -129,13 +129,12 @@ public class CLRTreeView : TreeView
     protected virtual string ReadInlineR(OpCodeInfo instr) => "ReadInlineR没实现";
     protected virtual string ReadInlineSig(OpCodeInfo instr)
     {
-        MetadataHeader.tableStream.ReadTypeSignature(instr.ReadUInt32());
+        // MetadataHeader.tableStream.ReadTypeSignature(instr.ReadUInt32());
         return "ReadInlineSig没实现";
     }
 
     protected virtual string ReadInlineVar(OpCodeInfo instr) => "ReadInlineVar没实现";
     protected virtual string ReadInlineSwitch(OpCodeInfo instr) => "ReadInlineSwitch没实现";
-    protected virtual string ReadInlinePhi(OpCodeInfo instr) => "<*****ReadInlinePhi*****>";
     
     protected virtual object ReadShortInlineI(OpCodeInfo instr)
     {
@@ -149,7 +148,7 @@ public class CLRTreeView : TreeView
     protected virtual uint ReadInlineBrTarget(OpCodeInfo instr) =>
         instr.Offset + (uint)instr.OpCodeSize + instr.ReadUInt32();
 
-    protected unsafe string ReadShortInlineBrTarget(OpCodeInfo instr) =>
+    protected virtual string ReadShortInlineBrTarget(OpCodeInfo instr) =>
         ToIlPtrBase(instr.Offset + (uint)instr.OpCodeSize + (uint)instr.ReadSInt8());
 
     protected virtual int ReadInlineI(OpCodeInfo instr) => instr.ReadInt32();
@@ -194,6 +193,7 @@ public class CLRTreeView : TreeView
     }
 
     protected virtual string ReadInlineNone(OpCodeInfo instr) => "";
+    protected virtual string ReadInlinePhi(OpCodeInfo instr) => "";
 
     protected virtual string ReadInlineField(OpCodeInfo instr) =>
         MetadataHeader.tableStream.ResolveToken(instr.ReadUInt32());

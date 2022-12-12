@@ -28,7 +28,6 @@ namespace PE_Tools
         private TreeView treeView;
         private TreeNode rootNode;
         private TreeNode classView;
-        private PeInfo info;
         private DataGridView songsDataGridView;
 
         private Dictionary<string, MDTable> tablesMaps = new Dictionary<string, MDTable>();
@@ -41,8 +40,6 @@ namespace PE_Tools
 
         public void Init(PeInfo info)
         {
-            this.info = info;
-
             treeView = new TreeView();
             treeView.NodeMouseClick += treeView1_AfterSelect;
             rootNode = new TreeNode();
@@ -81,7 +78,7 @@ namespace PE_Tools
             tablesNode.Text = "Tables";
             rootNode.Nodes.Add(tablesNode);
 
-            metadataHeader = info.clrDirectory.metadataHeader;
+            var metadataHeader = info.clrDirectory.metadataHeader;
             tableStream = MetadataHeader.tableStream;
             foreach (var table in tableStream.tables)
             {
@@ -141,7 +138,6 @@ namespace PE_Tools
         }
 
         private string selectedNodeName;
-        private MetadataHeader metadataHeader;
 
         private void treeView1_AfterSelect(object sender, TreeNodeMouseClickEventArgs e)
         {
