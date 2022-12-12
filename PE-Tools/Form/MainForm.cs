@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -55,8 +56,10 @@ namespace PE_Tools
             this.AllowDrop = true;
             this.DragDrop += Form1_DragDrop;
             this.DragEnter += Form1_DragEnter;
-            // OpenPE(@"C:\fanmeta-tklua\Assets\Source\Client\AppClient~\bin\Debug\AppClient.dll");
-            // OpenPE(@"C:\hybridclr_trial\Assets\StreamingAssets\Assembly-CSharp.dll.bytes");
+
+            string cacheFile = Path.Combine(Environment.CurrentDirectory, "cache.txt");
+            if (File.Exists(cacheFile))
+                OpenPE(File.ReadAllText(cacheFile));
         }
 
         private void Form1_DragEnter(object sender, DragEventArgs e) //解析信息
@@ -95,6 +98,9 @@ namespace PE_Tools
 
         void OpenPE(string path)
         {
+            string cacheFile = Path.Combine(Environment.CurrentDirectory, "cache.txt");
+            if (!File.Exists(cacheFile))
+                File.WriteAllText(cacheFile, path);
             PeInfo tmpInfo;
             try
             {
@@ -195,7 +201,7 @@ namespace PE_Tools
 
             return ReturnTable;
         }
-    
+
         private void AddTableRow(DataTable RefTable, byte[] Data, string Name, string Describe)
         {
             RefTable.Rows.Add(new string[]
@@ -208,6 +214,7 @@ namespace PE_Tools
                 Describe
             });
         }
+
         void CreateDirDataPanel(TabPage tabPage1)
         {
             DataGridView songsDataGridView = new DataGridView();
@@ -273,7 +280,7 @@ namespace PE_Tools
 
             return ReturnTable;
         }
-        
+
         private DataRow AddTableRow2(DataTable RefTable, string Name, byte[] Data, byte[] Size)
         {
             return RefTable.Rows.Add(new string[]
@@ -285,7 +292,7 @@ namespace PE_Tools
                 PETools.GetInt(Size).ToString()
             });
         }
-        
+
         void OnDirBtnClick(object sender, EventArgs e)
         {
             Button bntinfo = sender as Button;
@@ -321,7 +328,7 @@ namespace PE_Tools
                         importForm.ShowDialog();
                         return;
                     }
-                    
+
                     break;
             }
 

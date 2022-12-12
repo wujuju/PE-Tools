@@ -326,7 +326,7 @@ public unsafe class PeInfo
                 ImportDirectory.ImportDate.FunctionList functionData =
                     new ImportDirectory.ImportDate.FunctionList();
                 LoadBytesByType(functionData);
-                if (PETools.GetUint(functionData.OriginalFirst) == 0) break;
+                if (PETools.GetLong(functionData.OriginalFirst) == 0) break;
                 Import.DllFunctionList.Add(functionData);
             }
 
